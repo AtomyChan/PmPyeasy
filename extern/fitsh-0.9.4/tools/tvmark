@@ -1,0 +1,217 @@
+#!/bin/bash
+
+function get_xpa_method()
+{
+ cat /proc/net/tcp | tr ":" " " | tail -n +2 | \
+ awk -v uid=`id -u` \
+  '{	port=strtonum("0x" $3);
+	if ( $2=="00000000" && $6=="0A" && $12==uid && 32768 <= port ) 
+		printf("localhost:%d\n",port);
+  }' | \
+ head -n 1 
+}
+
+TVMARK_VERSION=0.3
+TVMARK_RELEASE=2018.10.01
+
+XPASET=xpaset
+METHOD=`get_xpa_method`
+if ! [ -n "$METHOD" ]; then
+	echo "$0: unable to fetch DS9 XPA listen port autmatically." >> /dev/stderr
+	exit	1
+fi
+
+CX=1
+CY=2
+CL=0
+LD=10
+LF=""
+
+WIDTH=1
+RAD=4
+COLOR="green"
+LCOLOR="red"
+IN=
+
+IS_DELETE=
+
+SHAPE=circle
+
+SELF=$0
+
+function print_error()
+{
+ echo "${SELF}: error: $*." >/dev/stderr
+}
+
+while [ -n "$1" ] ; do
+    case "$1" in 
+	-x|--col-xy)
+		CC=($(echo $2 | tr "," " "))
+		CX=${CC[0]}
+		CY=${CC[1]}
+		( test $CX -gt 0 -a $CY -gt 0 &>/dev/null ) || \
+		 {	print_error "invalid column format: '$2'"
+			exit 1;
+		 }
+		shift
+		;;
+	-p|--separation)
+		LD="$2"
+		( test $LD -gt 0 &>/dev/null ) || \
+		 {	print_error "invalid label separatio: '$2'" 
+			exit 1;
+		 }
+		shift
+		;;		
+	-l|--col-label)
+		CL=$2
+		( test $CL -gt 0 &>/dev/null ) || \
+		 {	print_error "invalid label column: '$2'" 
+			exit 1;
+		 }
+		shift
+		;;
+	-f|--label)
+		LF="$2"
+		shift
+		;;
+	-r|--radius|-s|--size)
+		RAD=$2
+		#( test $RAD -gt 0 &>/dev/null ) || \
+		# {	print_error "invalid radius or size: '$2'" 
+		#	exit 1;
+		# }
+		shift
+		;;
+	-w|--width)
+		WIDTH="$2"
+		shift
+		;;
+	-c|--color|--colour)
+		[ -n "$2" ] || 
+		 {	print_error "invalid color: '$2'"
+			exit 1;
+		 }
+		COLOR=$2
+		shift
+		;;
+	-a|--label-color|--label-colour)
+		[ -n "$2" ] || 
+		 {	print_error "invalid color: '$2'"
+			exit 1;
+		 }
+		LCOLOR=$2
+		shift
+		;;
+	-d|--delete)
+		IS_DELETE=1
+		;;
+	-e|--circle)
+		SHAPE=circle
+		;;
+	-q|--square|--box)
+		SHAPE=square
+		;;
+	-v|--version)
+		echo -e "$0 ${TVMARK_VERSION} (${TVMARK_RELEASE})"
+		echo -e "(c) 2007, 2013; Pal, A. <apal@szofi.net>"
+		exit	0
+		;;
+	-h|--help)
+		echo -e "Usage:\t$0 [-h|--help] [-v|--version]"
+		echo -e "\t[<input>]" 
+		echo -e "\t[-x|--col-xy <column_index_x>,<column_index_y>] "
+		echo -e "\t[-e|--circle [-r|--radius <r>]]"
+		echo -e "\t[-q|--square [-s|--size <s>]]"
+		echo -e "\t[-w|--width <width>] [-c|--color <c>]"
+		echo -e	"\t[-l|--col-label <column_index_label>"
+		echo -e "\t[-f|--label '<label_format>']"
+		echo -e "\t[-p|--separation <label_separation>"
+		echo -e "\t[-a|--label-color <c>]"
+		echo -e "\t[-d|--delete]"
+		echo -e "Notes:"
+		echo -e " - in the label string, \$<N> is replaced by the content of the <N>th column"
+		echo -e "   (like in AWK)"
+		echo -e " - default format: --col-xy $CX,$CY --circle --color $COLOR --radius $RAD"
+		exit 0
+		;;
+	-*)
+		print_error "invalid command line argument near '$1'"
+		exit 1
+		;;
+	*)
+		[ -n "$IN" ] &&
+		 {	print_error "input file has been specified yet"
+			exit 1;
+		 }
+		IN=$1
+		;;
+    esac ; shift
+done
+
+
+( ${XPASET} -h 2>&1 > /dev/null ) >/dev/null
+if test $? == 127; then
+	print_error "program ${XPASET} is not available, exiting" 
+	exit 1
+fi
+
+if [ -n "$IS_DELETE" ] ; then
+	${XPASET} ${METHOD} regions delete all </dev/null 2>/dev/null || \
+	 {	print_error "${XPASET} failed (maybe DS9 is not running?)"
+		exit 1;
+	 }
+	exit 0
+fi
+
+[ -n "$IN" ] && { [ -f "$IN" ] || \
+ {	print_error "file '$IN' not exists" 
+	exit 1;
+ }; }
+
+if [ ! -n "$IN" -o "$IN" == "-" ] ; then
+	TMP=`mktemp`
+	cat $IN >$TMP
+	IN="$TMP"
+else
+	TMP=""
+fi
+
+(	echo "global color=$COLOR width=$WIDTH" 
+	echo "image"
+	case $SHAPE in 
+	    square)
+		cat $IN | awk -v CX=$CX -v CY=$CY -v RAD=$RAD \
+		'!/^#/{ printf ("box(%g,%g,%g,%g)\n",$(CX)+0.5,$(CY)+0.5,RAD,RAD); }'
+		;;
+	    circle|*)
+		cat $IN | awk -v CX=$CX -v CY=$CY -v RAD=$RAD \
+		'!/^#/{ printf ("circle(%g,%g,%g)\n",$(CX)+0.5,$(CY)+0.5,RAD); }'
+		;;
+	esac	
+
+	if [ $CL -gt 0 ] || [ -n "$LF" ] ; then
+		echo "global color=$LCOLOR width=$WIDTH" 
+		cat $IN | awk -v CX=$CX -v CY=$CY -v CL=$CL -v LF="$LF" -v RAD=$RAD -v LD="$LD" \
+		'!/^#/{  
+			if ( LF != "" )
+			 {	f=LF;
+				for ( i=NF ; i>=1 ; i-- )
+				 {	r=sprintf("\\$%d",i);
+					gsub(r,$(i),f);
+				 }
+				printf("text(%g,%g,\"%s\")\n",$(CX),$(CY)-RAD/2-LD,f);
+			 }
+			else if ( CL>0 )
+				printf("text(%g,%g,\"%s\")\n",$(CX),$(CY)-RAD/2-LD,$(CL));
+		}' 
+	fi
+
+) | ${XPASET} ${METHOD} regions 2>/dev/null || \
+ {	print_error "${XPASET} failed (maybe DS9 is not running)"
+	exit 1;
+ }
+
+test -n "$TMP" && rm -f "$TMP"
+

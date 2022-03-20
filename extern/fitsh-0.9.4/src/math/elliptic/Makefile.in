@@ -1,0 +1,24 @@
+SHELL=/bin/sh
+
+CC=@CC@
+AR=@AR@
+LD=@LD@
+RANLIB=@RANLIB@
+
+CFLAGS=@CFLAGS@
+
+.PHONY: all clean
+
+TARGETS=elliptic.o ntiq.o
+
+all: $(TARGETS)
+
+elliptic.o: elliptic.c elliptic.h
+	$(CC) $(CFLAGS) -c elliptic.c
+
+ntiq.o: ntiq.c ntiq.h
+	$(CC) $(CFLAGS) -c ntiq.c
+
+clean:
+	rm -f *.o $(TARGETS)
+

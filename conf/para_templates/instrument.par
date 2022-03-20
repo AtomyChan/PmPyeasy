@@ -1,0 +1,8 @@
+GAIN      = 1.4
+MIN_LEVEL = 0.0
+SAT_LEVEL = 46000.0
+NX        = 2027
+NY        = 2027
+MARG      = 10
+FITS      = fits
+END

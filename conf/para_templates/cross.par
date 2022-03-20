@@ -1,0 +1,7 @@
+X_NBIN = 4	// binning factor in X direction
+Y_NBIN = 4	// binning factor in Y direction
+NX_CUT = 2048	// X-size of central part of image for calculation [2^k]
+NY_CUT = 2048	// Y-size of central part of image for calculation [2^k]
+BKG_FRAC = 0.5	// moment to be taken as a background level (0.5 = median)
+VERBOSE  = 2	// verbose level 0,1,...
+END

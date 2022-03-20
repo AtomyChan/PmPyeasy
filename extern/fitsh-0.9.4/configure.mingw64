@@ -1,0 +1,10 @@
+#!/bin/sh
+
+MINGW_BIN_PREFIX=x86_64-w64-mingw32
+HOST=win64
+
+CC=${MINGW_BIN_PREFIX}-gcc \
+AR=${MINGW_BIN_PREFIX}-ar \
+LD=${MINGW_BIN_PREFIX}-ld \
+RANLIB=${MINGW_BIN_PREFIX}-ranlib \
+./configure --host=${HOST} $@

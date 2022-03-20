@@ -1,0 +1,208 @@
+Dear user,
+
+DoPHOT is a computer program to obtain PSF photometry from astronomical images, 
+written in the '90s by P.Schechter, M. Mateo, and A. Saha. You can get a 
+complete and deep explanation of its main characteristics, and how it works 
+from their published article on the program ("DoPHOT, A CCD Photometry Program:
+Description and Tests", 1993 PASP, 105, 1345).
+
+You are about to run MY distribution of Dophot. The main new characteristics 
+of this distribution of DoPHOT are:
+- All the program subroutines and functions have been rewritten to make them 
+  compatible with the standards of Fortran90.
+- I have tried to make the subroutines and functions more easily readable. 
+  To achieve that, I have eliminated all the common statements present in 
+  previous versions and named all the variables used by the subroutine and 
+  function in the call statement. Also with the same spirit of making 
+  the program more understandable I have created, combined or eliminated 
+  some of the subroutines, and included, at the beginning of each file, 
+  a brief explanation of what every function and subroutine does.
+- The program works now with real values for the pixel values, so you do 
+  not need to worry about conversions to integers as in previous distributions.
+- The stars are masked, obliterated, added, and substracted across the 
+  different subroutines of the program in circular sections, and not in 
+  rectangular sections as before. This way less usable pixels are obliterated, 
+  and less pixels outside an interesting radius are dealt with. 
+- The program provides the option of just doing aperture photometry. Truly it 
+  is kind of an 'enhanced' aperture photometry, since the program uses its 
+  algorithms to locate stars, and only at the end calculates the photometry 
+  of the found objects performing aperture photometry, but with the neighbours 
+  subtracted, which should lead to more accurate aperture photometry.
+- The program provides the option for more precise location and identification 
+  of 'volcano' objects (saturated objects that due to the reduction process 
+  show a fictitious decrease of counts towards their centers). ***
+- The program provides the option to obtain the photometry of saturated 
+  objects.*** 
+
+In addition to this, this distribution share some of the characteristics of 
+the program that were present in previous distributions, but that were not 
+mention in the original paper.
+- DoPHOT allows for a variable PSF model in the image.
+- DoPHOT can perform an aperture correction to the magnitudes obtained, 
+  according to their positions and magnitudes. The program checks for 
+  variations in the aperture correction in magnitide and in position 
+  in the image, and corrects the fitted magnitude accordingly.
+- DoPHOT can try to match the positions of the stars with those of a
+  given file, using the auto-matching option. This characteristic is
+  additional to the warmstart described in section 4.7 of the DoPHOT
+  paper. Here the program does not use the positions given to find the
+  photometry of the stars there, but first find the stars and their
+  photometry as if no warmstart is present, and only in the end tries
+  to match the stellar positions with the ones contained in the file
+  given. This is useful if, for example, we have images in several
+  filters and we want to get a color-magnitude diagram, for which we
+  will need to match the stars found in the different filters.
+
+As I have rewritten most of the subroutines and written some new ones, 
+any problem that you may find will probably be my fault, and not a problem 
+in the original program. I have run this distribution of DoPHOT on only a 
+limited basis, but to my knowledge, everything seems to work fine. However, 
+if you find any bug or problem, please report it to me (jalonso@astro.puc.cl), 
+so I can fix it in the updated version of the program that I keep in my webpage.
+
+Javier Alonso-Garcia
+Millennium Postdoctoral Fellow
+Department of Astronomy and Astrophysics,
+Pontificia Universidad Catolica de Chile
+E-mail: jalonso@astro.puc.cl
+
+ACKNOWLEDGEMENT: Please, if you make use of this distribution of DoPHOT, 
+cite both Schechter et al.(1993) and Alonso-Garcia et al.(2011): 
+Schechter, P., Mateo, M., & Saha, A. 1993, PASP, 105, 1342
+Alonso-Garcia, J., Mateo, M., Sen, B., Banerjee, M., Catelan, M., Minniti, M., & von Braun, K., 2011, arXiv:1111.5628, accepted for publication in AJ
+
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+
+How to compile the program:
+
+Dophot needs you to have previously installed in your computer 
+a Fortran90 compiler (I use GNU gfortran), and the libcfitsio.a library.
+To get the cfitsio library,download in your computer the last version of cfitsio
+(Unix.tar file in http://heasarc.gsfc.nasa.gov/fitsio/?ref=darwinports.com), 
+uncompress and compile cfitsio (if using a Mac, check 
+http://heasarc.gsfc.nasa.gov/fitsio/mac_universal_binary.html)
+Once you have gfortran (or similar compiler), and libcfitsio.a, edit the 
+Makefile file of this distribution of DoPHOT and change it accordingly to 
+where your library is and the compiler you use, save it and type
+
+ > make dophot
+
+and you should be able to run the program by typing in the command line
+
+> dophot
+
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+
+DoPHOT parameters:
+
+DoPHOT needs a good (but not perfect) set of initial parameters to run 
+appropiately. The set of parameters used and a brief explanation of their 
+function can be found by checking the paramdefault file included in the 
+distribution. The parameters neccesary to correctly run the program 
+can be supply to program by editing the paramdefault file, or better, 
+creating a tuneup file with the values of the parameters we want, 
+and running DoPHOT by writting in the command line
+
+ > dophot file.tuneup
+
+The parameters that most definetely you will need to provide are:
+FWHM = first guess of the FWHM, 10% precision is good enough.
+SKY = first guess for the sky value, 10% precision is good enough.
+EPERDN =  electrons per data number, 'gain', usually available in image´s header
+RDNOISE = readout noise in electrons, usually available in header of the image.
+TOP = maximum allowed data value in data numbers, the saturation limit.
+IMAGE_IN = ' '  Input image name. 
+OBJECTS_OUT = ' '   Output object list file name.
+
+
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+
+Output format:
+
+The results after running the program can be presented in 5 different ways 
+according to the value of the OBJTYPE_OUT parameter.
+
+OBJTYPE_OUT = 'INTERNAL'
+  Format: Stellar function parameters (1-7), aperture parameters(1-4), 
+           extendedness 
+          (see subroutines stpar and improve for a proper explanation) 
+
+OBJTYPE_OUT = 'COMPLETE'
+  Format: Star number, objtype, xpos, ypos, fitmag, err_fitmag, fitsky, 
+          FWHM_major, FWHM_minor, tilt, extendedness, apmag, err_apmag, 
+          apsky, diff_fit_ap(apcorr)
+
+OBJTYPE_OUT = 'INCOMPLETE'
+  Format: Star number,xpos,ypos,fitmag,err_fitmag,fitsky,objtype,extendedness,
+          diff_fit_ap(apcorr)
+
+OBJTYPE_OUT = 'BINARY'
+  Format: objtype,xpos,ypos,fitmag,err_fitmag,fitsky,FWHM_major,FWHM_minor,tilt
+
+OBJTYPE_OUT = 'DAOPHOT' (this is the default option)
+  Format: Star number,xpos,ypos,fitmag,err_fitmag,fitsky,objtype,chi,
+          diff_fit_ap(apcorr)
+
+The objtype refers to the type of the object observed. DoPHOT classifies all 
+the observed found objects in 9 different types:
+ Type 1: A "perfect" star. Type 1 objects are used to compute the 7-parameter
+         weighted-mean stellar shape used to extract photometric data 
+         from an image.
+ Type 2: The object is not as peaked as a star and has been classified as 
+         a "galaxy".
+ Type 3: A blend of 2 close stars, with the data being for one component of 
+         the pair. The final fit uses mean shape parameters for single stars 
+         determined from all type 1 objects on the image.
+ Type 4: Fit failed to converge on a 4-parameter fit based on the mean 
+         single-star shape. Photometry is unreliable.
+ Type 5: Not enough points with adequate S/N for a full 7-parameter fit, 
+         so a 4-parameter fit attempted and succeeded. Photometry is suspect, 
+         and may indicate image problems or that the object is not a star.
+ Type 6: Too few points with adequate S/N for even a 4-parameter fit with 
+         the mean Type 1 star shape. Not subtracted from the image.
+ Type 7: Object too faint for a full 7-parameter mean-star fit. No object 
+         classification is possible. The results are for a 4-parameter fit, 
+         and are reasonable only if the object really is a star.
+ Type 8: Object was "obliterated" becase it was determined to be saturated, 
+         either above the pre-set threshold or found to be flat-topped.
+ Type 9: Fit failed to converge or center of the star out of the image.
+         Photometry is unreliable.
+In addition to these types, stars from a warmstart with positions and/or
+shapes fixed are given types equal to the ones described plus 10.
+
+Note that with the DAOPHOT option stars of type 4, 6, 8, and 9 will not 
+appear in the summary file.
+ 
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+
+Masking bad regions:
+
+Sometimes we find in the images 'hot' pixels and columns, or bad regions 
+that we want to mask. To tell DoPHOT about their existance, and make it mask 
+them, we can use a little trick: we can tell DoPHOT that these regions are 
+saturating stars (type 8 objects), we just need to find the center of the 
+region (starpar3 and starpar4 parameter) and its width and height (actually, 
+half-width and half-height, to be given as starpar5 and starpar7 parameters). 
+Hence if we create a file with the parameters of these objects and feed DoPHOT 
+with it as it was a warmstart (just provide the file name as the OBJECTS_IN 
+parameter in the tuneup or paramdefault file), DoPHOT will obliterate these 
+regions.
+NOTE: Notice that since these regions have usually a rectangular shape, I have 
+modified the warmstart subroutine to obliterate these "type 8 stars" in 
+rectangles, not in circles like in the rest of the program.
+
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+
+*** USE CAUTION Options to locate the 'volcano' stars and to provide
+the photometry for saturated objects should be use with extra caution
+since they are only in alpha testing. Especially the photometry of
+saturated stars can show significant deviations (more than 0.1 mag of
+the true value) at 1-1.5 magnitudes over the saturation limit.
+
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------

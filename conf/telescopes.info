@@ -1,0 +1,751 @@
+[LCOGT]
+code:		LCO
+gain:		1.0
+readnoise:	7.5
+satval:		65535
+nx:		4096
+ny:		4096
+fltkey:		FILTER
+obstimekey:	MJD-OBS
+exptimekey:	EXPTIME
+bitpixkey:	BITPIX
+airmasskey:     AIRMASS
+
+[LCOGT2m]
+code:		LCO2m
+gain:		1.0
+readnoise:	11.3
+satval:		500000
+nx:		2048
+ny:		2048
+fltkey:		FILTER
+obstimekey:	MJD-OBS
+exptimekey:	EXPTIME
+bitpixkey:	BITPIX
+airmasskey:
+
+
+[LCOGT0m4]
+code:		LCO0m4
+gain:		1.0
+readnoise:	16.4
+satval:		153440
+nx:		1523
+ny:		1020
+fltkey:		FILTER
+obstimekey:	MJD-OBS
+exptimekey:	EXPTIME
+bitpixkey:	BITPIX
+airmasskey:
+
+
+[LT]
+code:		LT
+gain:		1.62
+readnoise:	8.0
+satval:		65535
+nx:		2048
+ny:		2048
+fltkey:		FILTER1
+obstimekey:	MJD
+exptimekey:	EXPTIME
+bitpixkey:	BITPIX
+airmasskey:
+
+
+
+[Iowa]
+code:		Iowa
+gain:		2.93
+readnoise:	10
+satval:		60000
+nx:		1024
+ny:		1024
+fltkey:		FILTER
+obstimekey:	JD
+exptimekey:	EXPTIME
+bitpixkey:	BITPIX
+airmasskey:
+
+
+
+[BNU85]
+
+
+
+
+[weihai]
+code:		WH
+gain:		1.8
+readnoise:	7.0
+satval:		65535
+nx:		2048
+ny:		2048
+fltkey:		FILTER
+obstimekey:	JD DATE-OBS TIME-OBS
+exptimekey:	EXPTIME
+bitpixkey:	BITPIX
+airmasskey:
+
+
+[JB]
+code:		JB
+gain:		1.59
+readnoise:	20
+satval:		65535
+nx:		3072
+ny:		2048
+fltkey:		FILTER
+obstimekey:	JD
+exptimekey:	EXPTIME
+bitpixkey:	BITPIX
+airmasskey:
+
+
+[RP]
+code:		RP
+gain:		3.0000
+readnoise:	13.0000
+satval:		65535
+nx:		1024
+ny:		1024
+fltkey:		FILTER
+obstimekey:	JD
+exptimekey:	EXPTIME
+bitpixkey:	BITPIX
+airmasskey:
+
+
+[RK]
+code:		RK
+gain:		1.0000
+readnoise:	1.0000
+satval:		65535
+nx:		1024
+ny:		1024
+fltkey:		FILTER
+obstimekey:	DATE-OBS TIME-OBS
+exptimekey:	EXPTIME
+bitpixkey:	BITPIX
+airmasskey:
+
+[OAUV]
+code:		OAUV
+gain:		1.0000
+readnoise:	1.0000
+satval:		65535
+nx:		2048
+ny:		2048
+fltkey:		FILTER
+obstimekey:	DATE-OBS
+exptimekey:	EXPTIME
+bitpixkey:	BITPIX
+airmasskey:
+
+
+[GC]
+code:		GC
+gain:		2.33
+readnoise:	1.0000
+satval:		65535
+nx:		2048
+ny:		2048
+fltkey:		FILTER
+obstimekey:	MIDPOINT JD
+exptimekey:	EXPTIME
+bitpixkey:	BITPIX
+airmasskey:
+
+
+[JG]
+code:		JG
+gain:		1.29
+readnoise:	10
+satval:		65535
+nx:		2048
+ny:		2048
+fltkey:		FILTER
+obstimekey:	JD
+exptimekey:	EXPTIME
+bitpixkey:	BITPIX
+airmasskey:
+
+[KA]
+code:		KA
+gain:		2.24
+readnoise:	10
+satval:		65535
+nx:		768
+ny:		512
+fltkey:		FILTER
+obstimekey:	DATE-AVG
+exptimekey:	EXPTIME
+bitpixkey:	BITPIX
+airmasskey:
+
+[NJ]
+code:		NJ
+gain:		1
+readnoise:	10
+satval:		65535
+nx:		1536
+ny:		1024
+fltkey:
+obstimekey:	DATE-OBS
+exptimekey:	EXPTIME
+bitpixkey:	BITPIX
+airmasskey:
+
+
+
+[MDM]
+code:		MDM
+gain:		1.0000
+readnoise:	1.0000
+satval:		65536
+nx:		4064
+ny:		1016
+fltkey:		FILTID1 FILTID2
+obstimekey:	JD
+exptimekey:	EXPTIME
+bitpixkey:	BITPIX
+airmasskey:
+
+
+
+[IMACS]
+code:		IMACS
+gain:		1.0
+readnoise:	5.5
+satval:		300000
+nx:		2112
+ny:		4160
+fltkey:		FILTER
+obstimekey:	DATE-OBS TIME-OBS
+exptimekey:	EXPTIME
+bitpixkey:	BITPIX
+airmasskey:
+
+[LTH2RG]
+code:		LTH2RG
+gain:		1.0
+readnoise:	15.5
+satval:		65536
+nx:		2040
+ny:		4040
+fltkey:		FILTER1
+obstimekey:	MJD
+exptimekey:	EXPTIME
+bitpixkey:	BITPIX
+airmasskey:
+
+
+[TJO]
+code:		TJO
+gain:		1.04
+readnoise:	9
+satval:		65535
+nx:		1024
+ny:		1024
+fltkey:		FILTER
+obstimekey:	JD
+exptimekey:	EXPTIME
+bitpixkey:	BITPIX
+airmasskey:
+
+[DEMONEXT]
+code:		DN
+gain:		1.0000
+readnoise:	1.0000
+satval:		65535
+nx:		2048
+ny:		2048
+fltkey:		FILTER
+obstimekey:	JD_UTC
+exptimekey:	EXPTIME
+bitpixkey:	BITPIX
+airmasskey:
+
+
+[SMARTS]
+code:		SM
+gain: 		2.3
+readnoise:	6.5
+satval:		65535
+nx:		1024
+ny:		1024
+fltkey:		CCDFLTID
+obstimekey:	JD
+exptimekey:	EXPTIME
+bitpixkey:	BITPIX
+airmasskey: SECZ
+
+
+[SMARTS-IR]
+code:		SM
+gain:		7.2
+readnoise:	20
+satval:		65535
+nx:		512
+ny:		512
+fltkey:		IRFLTID
+obstimekey:	JD
+exptimekey:	EXPTIME
+bitpixkey:	BITPIX
+airmasskey: SECZ
+
+
+
+[REM]
+code:		REM
+gain:		1.0
+readnoise:	4.5
+satval:		65535
+nx:		1024
+ny:		1024
+fltkey:		FILTER
+obstimekey:	MJD-OBS
+exptimekey:	EXPTIME
+bitpixkey:	BITPIX
+airmasskey:
+
+
+[REM-NIR]
+code:		REM
+gain:		5.0
+readnoise:	4.5
+satval:		65535
+nx:		512
+ny:		512
+fltkey:		FILTER
+obstimekey:	MJD-OBS
+exptimekey:	EXPTIME
+bitpixkey:	BITPIX
+airmasskey: AIRMASS
+
+
+[WFCCD]
+code:		WFCCD
+gain: 		0.75
+readnoise:	3.6
+satval:		70000
+nx:		2268
+ny:		1241
+fltkey:		FILTER
+obstimekey:	DATE-OBS UT-TIME
+exptimekey:	EXPTIME
+bitpixkey:	BITPIX
+airmasskey:
+
+
+
+[SITe2K]
+code:		SITe2K
+gain:		3.0
+readnoise:	9.9
+satval:		65535
+nx:		2048
+ny:		1024
+fltkey:		FILTER
+obstimekey:	DATE-OBS UT-TIME
+exptimekey:	EXPTIME
+bitpixkey:	BITPIX
+airmasskey:
+
+
+[GS]
+code:		GS
+gain: 		0.78
+readnoise: 	15
+satval: 	35000
+nx:		4008
+ny:		2672
+fltkey:		FILTER
+obstimekey:	JD
+exptimekey: 	EXPOSURE
+bitpixkey:	BITPIX
+airmasskey:
+
+
+[SDSS]
+code:           SDSS
+gain:		1.0000
+readnoise:	1.0000
+satval:         65535
+nx:             2048
+ny:             1489
+fltkey:         FILTER
+obstimekey:     DATE-OBS TAIHMS
+exptimekey:     EXPTIME
+bitpixkey:      BITPIX
+airmasskey:
+
+[LDSS3C]
+code:		LDSS3C
+gain:		1.0
+readnoise:	4.0
+satval:		65535
+nx:		1152
+ny:		4224
+fltkey:		FILTER
+obstimekey:	DATE-OBS TIME-OBS
+exptimekey:	EXPTIME
+bitpixkey: 	BITPIX
+airmasskey:
+
+
+[OSIRIS]
+code:		OSIRIS
+gain:		0.95
+readnoise:	1.0000
+satval:		65535
+nx:		1024
+ny:		2048
+fltkey:		FILTER2
+obstimekey:	MJD-OBS
+exptimekey:	EXPTIME
+bitpixkey: 	BITPIX
+airmasskey:
+
+[JN]
+code:		JN
+gain:		1.0000
+readnoise:	1.0000
+satval:		65535
+nx:		1530
+ny:		1020
+fltkey:		FILTERS
+obstimekey:	DATE-OBS
+exptimekey:	EXPOSURE
+bitpixkey: 	BITPIX
+airmasskey:
+
+
+[ALFOSC]
+code:		ALFOSC
+gain:		0.33
+readnoise:	4.2
+satval:		655350
+nx:		2000
+ny:		2000
+fltkey:		ALFLTNM FAFLTNM
+obstimekey:	DATE-OBS
+exptimekey:	EXPTIME
+bitpixkey: 	BITPIX
+airmasskey:
+
+
+[MODS1R]
+code:		MODS1R
+gain:		1.0000
+readnoise:	1.0000
+satval:		65535
+nx:		3088
+ny: 		3088
+fltkey:		FILTNAME
+obstimekey:	MJD-OBS
+exptimekey:	EXPTIME
+bitpixkey:	BITPIX
+airmasskey:
+
+
+[PanSTARRS]
+code:		PS
+gain:		1.08
+readnoise:	127.77
+satval: 	900000
+nx:		3600
+ny:		3600
+fltkey:		FPA.FILTERID
+obstimekey:     MJD-OBS
+exptimekey:	EXPTIME
+bitpixkey:	BITPIX
+airmasskey:
+
+
+[NOTCAM]
+code:		NC
+gain:		2.65
+readnoise:      9.0
+satval:		65535
+nx:		1024
+ny:		1024
+fltkey:		NCFLTNM1 NCFLTNM2
+obstimekey:	DATE-OBS
+exptimekey:	EXPTIME NCOMBINE
+bitpixkey:	BITPIX
+airmasskey:
+
+
+[ARIES130cm]
+code:		AR130
+gain:		7.0
+readnoise:	2.0
+satval:		65535
+nx:		2048
+ny:		2048
+fltkey:
+obstimekey:	FRAME
+exptimekey:	EXPOSURE
+bitpixkey:	BITPIX
+airmasskey:
+
+[EFOSC2]
+code:		EFOSC2
+gain:		1.1
+readnoise:	7.8
+satval:		65535
+nx:		1030
+ny:		1030
+fltkey:
+obstimekey:	MJD-OBS
+exptimekey:	EXPTIME
+bitpixkey:	BITPIX
+airmasskey:
+
+
+[LOTIS]
+code:		LOTIS
+gain:		3.93
+readnoise:	11.59
+satval:		65535
+nx:		2048
+ny:		2048
+fltkey:		FILTER
+obstimekey:	DATE-OBS
+exptimekey:	EXPTIME
+bitpixkey:	BITPIX
+airmasskey:
+
+
+[SWIFTtest]
+code:		SWtest
+gain:		1.0
+readnoise:	1.0
+satval:		65535
+nx: 		1336
+ny:		1370
+fltkey:		FILTER
+obstimekey:	DATE-OBS
+exptimekey:	EXPOSURE
+bitpixkey:	BITPIX
+airmasskey:
+
+
+
+[IRIDA]
+code:		IRIDA
+gain: 		0.79
+readnoise:	1.0
+satval:		65535
+nx:		1602
+ny:		1482
+fltkey:		FILTER
+obstimekey:	JD
+exptimekey:	EXPTIME
+bitpixkey:	BITPIX
+airmasskey:
+
+
+[Rozhen2m]
+code:		Rozhen2m
+gain:		1.0
+readnoise:	1.0
+satval:		65535
+nx:		1024
+ny:		1024
+fltkey:		FILTER
+obstimekey:	DATE-OBS
+exptimekey:	EXPTIME
+bitpixkey:	BITPIX
+airmasskey:
+
+[Rozhen50]
+code:		Rozhen50
+gain:		1.0
+readnoise:	1.0
+satval:		65535
+nx:		1401
+ny:		1401
+fltkey:		FILTER
+obstimekey:	DATE-OBS
+exptimekey:	EXPTIME
+bitpixkey:	BITPIX
+airmasskey:
+
+[StuParker]
+code:		SP
+gain:		1.5
+readnoise:	1.0
+satval:		65535
+nx:		1000
+ny:		1000
+fltkey:
+obstimekey:	DATE-OBS
+exptimekey:	EXPTIME
+bitpixkey:	BITPIX
+airmasskey:
+
+
+
+[DT]
+code:		DT
+gain:		1.0
+readnoise:	1.0
+satval:		65535
+nx:		4096
+ny:		4096
+fltkey:		FILTER
+obstimekey:	JD
+exptimekey:	EXPTIME
+bitpixkey:	BITPIX
+airmasskey:
+
+[TV]
+code:		TV
+gain:		1.18
+readnoise:	1.0
+satval:		65535
+nx:		728
+ny:		490
+fltkey:		FILTER
+obstimekey:	JD
+exptimekey:	EXPTIME
+bitpixkey:	BITPIX
+airmasskey:
+
+
+[WFCAM]
+code:		WFCAM
+gain:		4.5
+readnoise:	25
+satval:		65535
+nx:		4096
+ny:		4096
+fltkey:		FILTER
+obstimekey:	MJD-OBS
+exptimekey:	EXP_TIME
+totalexptime: EXP_TIME NEXP NJITTER NUSTEP
+bitpixkey:	BITPIX
+airmasskey:	AMSTART AMEND
+
+[UFTI]
+code:		UFTI
+gain:		5.454
+readnoise:	26
+satval:		65535
+nx:		2048
+ny:		2048
+fltkey:		FILTER
+obstimekey:	MJD-OBS
+exptimekey:	EXP_TIME
+bitpixkey:	BITPIX
+airmasskey:	AMSTART AMEND
+
+[FORS2]
+code:		FORS2
+gain: 		1.0
+readnoise:	1.0
+satval:		65535
+nx:		2048
+ny:		2048
+fltkey:
+obstimekey:	MJD-OBS
+exptimekey:	EXPTIME
+bitpixkey:	BITPIX
+airmasskey:
+
+[PTF]
+code:		PTF
+gain: 		1.7
+readnoise:	5.1
+satval:		65535
+nx:		2048
+ny:		2048
+fltkey:         FILTER
+obstimekey:	OBSJD
+exptimekey:	EXPTIME
+bitpixkey:	BITPIX
+airmasskey:     AIRMASS
+
+[WISE]
+code:		WISE
+gain:		1.0
+readnoise:	0
+satval:		65535
+nx:		2048
+ny:		2048
+fltkey:		REFEREN1
+obstimekey:	MJDMIN MJDMAX
+exptimekey:	
+bitpixkey:	BITPIX
+airmasskey:
+
+[SOFI]
+code:		SOFI
+gain:		14.4
+readnoise:	3.76
+satval:		65535
+nx: 		2048
+ny:		2048
+fltkey:		FILTER
+obstimekey:	MJD-OBS
+exptimekey:	EXPTIME
+bitpixkey:	BITPIX
+airmasskey:	AIRMASS
+
+[2MASS]
+code:		2MASS
+gain:		1.0
+readnoise:	1.0
+satval:		65535
+nx: 		2048
+ny:		2048
+fltkey:		FILTER
+obstimekey:	UT_DATE UT
+exptimekey:
+bitpixkey:	BITPIX
+airmasskey:
+
+
+[ZTF]
+code:		ZTF
+gain:		6.2
+readnoise:	10
+satval:		65535
+nx: 		2048
+ny:		2048
+fltkey:		FILTER
+obstimekey:	OBSJD
+exptimekey:	EXPTIME
+bitpixkey:	BITPIX
+airmasskey:	AIRMASS
+
+[XSHOOTER]
+code:		XSHOOTER
+gain:		1.29
+readnoise:	4.12
+satval:		65535
+nx: 		562
+ny:		528
+fltkey:	
+obstimekey:
+exptimekey:
+bitpixkey:
+airmasskey:	
+
+
+[GeminiGMOSS]
+code:		GMOSS
+gain:		3
+readnoise:	6.67
+satval:		65535
+nx: 		3108
+ny:		2304
+fltkey:		FILTER2
+obstimekey:	MJD-OBS
+exptimekey:	EXPTIME
+bitpixkey:	BITPIX
+airmasskey:
+
+

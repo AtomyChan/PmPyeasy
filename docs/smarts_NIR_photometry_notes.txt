@@ -1,0 +1,19 @@
+photometry for SMARTS NIR images should be the most annoying work...
+
+first, do sky subtraction:
+sn.smarts_nir_flt_image_reduction_sky_substraction
+
+then try to get the bkg and fwhm of the images:
+the typical routine will very likely fail... 
+
+do PSF photometry
+improper bkg value (eg. 0) and fwhm (too large) will cause the PSF photometry task fail
+
+assign one template image to the images in the filter then prepare the reference star mag list
+sn.get_template_reference_mags_flt
+
+relative calibration:
+sn._photometry__get_relative_mag_single_manual_match
+
+calibration to 2mass:
+sn._photometry__get_tpl_calibrated_mag_manual_method

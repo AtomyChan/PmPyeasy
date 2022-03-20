@@ -1,0 +1,22 @@
+Actually this is not specificly for SMARTS optical images but for all situations  when the images have small FOV and it's not likely to get the WCS solution easily. Then matching between stars in template images and standard stars from external catalog can not be done automatically where manual work required. 
+
+Display magnitudes from standard catalog and reference images and then match the common stars. 
+
+first set the pixel scale
+$sn.pixscale = 
+$sn.show_standards_for_wcs_not_available(...)  #see the input options 
+
+sn.standards will be displayed on template images with (RA, Dec) transformed to image coordinate 
+
+(To check how well the transformation between sky coordinate to image coordinate, we can load the standard stars to one image with well determined WCS info in header. prepare the image first then use function below:
+$sn._photometry__load_standards_region_to_ds9_image()
+)
+
+$sn.get_template_reference_mags_flt()
+
+$sn.show_reference_stars_with_id_on_template_image_flt()
+
+
+$sn.standard_calibration_flt_manual_match_method()
+
+

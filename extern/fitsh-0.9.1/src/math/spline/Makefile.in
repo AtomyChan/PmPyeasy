@@ -1,0 +1,26 @@
+SHELL=/bin/sh
+
+CC=@CC@
+AR=@AR@
+LD=@LD@
+
+CFLAGS=@CFLAGS@
+
+all: bicubic.o biquad.o biquad-isc.o spline.o
+
+.PHONY: all clean
+
+bicubic.o: bicubic.c bicubic.h
+	$(CC) $(CFLAGS) -c bicubic.c
+
+biquad.o: biquad.c biquad.h
+	$(CC) $(CFLAGS) -c biquad.c
+
+biquad-isc.o: biquad-isc.c biquad-isc.h
+	$(CC) $(CFLAGS) -c biquad-isc.c
+
+spline.o: spline.c spline.h
+	$(CC) $(CFLAGS) -c spline.c
+
+clean:
+	rm -f *.o *.a

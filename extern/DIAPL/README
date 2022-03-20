@@ -1,0 +1,53 @@
+
+          This is a README file for DIAPL pipeline.
+
+/***************************************************************************/
+/*                                                                         */
+/*  Original source code:                                                  */
+/*  Copyright (C) 2005 by Przemek Wozniak                                  */
+/*  wozniak@lanl.gov                                                       */
+/*                                                                         */
+/*  Modifications:                                                         */
+/*  Copyright (C) 2005 by Wojtek Pych, CAMK PAN                            */
+/*  pych@camk.edu.pl                                                       */
+/*                                                                         */
+/*   This program is free software; you can redistribute it and/or modify  */
+/*   it under the terms of the GNU General Public License as published by  */
+/*   the Free Software Foundation; either version 2 of the License, or     */
+/*   (at your option) any later version.                                   */
+/*                                                                         */
+/*   This program is distributed in the hope that it will be useful,       */
+/*   but WITHOUT ANY WARRANTY; without even the implied warranty of        */
+/*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         */
+/*   GNU General Public License for more details.                          */
+/*                                                                         */
+/*   You should have received a copy of the GNU General Public License     */
+/*   along with this program; if not, write to the                         */
+/*   Free Software Foundation, Inc.,                                       */
+/*   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             */
+/*                                                                         */
+/***************************************************************************/
+
+The programs are provided for those who would like to try
+the optimal image subtraction algorithm of Alard & Lupton (1998, ApJ, 503, 325)
+Currently there is a limited support by Wojtek Pych (pych@camk.edu.pl).
+The manual is under construction.
+
+There are separate directories for each of the C-programs with
+the appropriate makefile.
+
+*.par files are stored in PARS directory and contain typical parameter
+values used for reductions.
+
+Shell scripts (tcsh) are stored in SCRIPTS directory.
+They seem to work under Red Hat LINUX. No other operating systems were
+tested so far.
+
+Typical run of the pipeline consits of the following steps:
+	diapl_setup.csh
+	mktpllist.csh
+	shifts.csh
+	template.csh
+	pipe.csh
+
+WP

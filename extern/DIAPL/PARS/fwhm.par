@@ -1,0 +1,14 @@
+SKY_MOD     = mode	/* sky calculation algorithm (mode/median/mean)	*/
+DATA_SIGN   = signed	/* data type (signed/unsigned)			*/
+APERTURE    = 8		/* aperture size in pixels			*/
+IN_SKY_RAD  = 2		/* sky annulus inner radius (times maxfwhm)	*/
+OUT_SKY_RAD = 5		/* sky annulus outer radius (times maxfwhm)	*/
+MARGIN      = 5		/* limit of the star distance from the edge	*/
+MIN_FWHM    = 2.6	/* minimum FWHM of a good star			*/
+MAX_FWHM    = 10.0	/* maximum FWHM of a good star			*/
+MIN_PEAK    = 5000.0	/* minimum peak of a good star			*/
+MAX_PEAK    = 2.0e4	/* maximum peak of a good star			*/
+MIN_SKY     = 0.0	/* minimum sky level				*/
+MAX_SKY     = 5000.0	/* maximum sky level				*/
+VERBOSE     = 0		/* verbose level 0,1,2				*/
+END

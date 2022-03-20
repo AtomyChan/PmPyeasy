@@ -1,0 +1,1 @@
+python ../client.py --server http://supernova.astrometry.net/api/ --apikey hywxthzjbbkglfgj --upload /home/supernova/test_temp/template_B.fits

@@ -1,0 +1,87 @@
+SHELL=/bin/sh
+
+CC=@CC@
+AR=@AR@
+LD=@LD@
+RANLIB=@RANLIB@
+
+CFLAGS=@CFLAGS@
+
+all: dirs
+	$(MAKE) targets
+
+dirs: dft fit intersec spline elliptic expint 
+
+targets: convexhull.o poly.o polyfit.o match.a splinefit.o polygon.o matrixvector.o
+
+.PHONY: all clean fit elliptic intersec spline expint dft dirs targets
+
+###############################################################################
+
+dft:
+	$(MAKE) -C dft
+
+elliptic:
+	$(MAKE) -C elliptic
+
+expint:
+	$(MAKE) -C expint
+
+fit:
+	$(MAKE) -C fit
+
+intersec:
+	$(MAKE) -C intersec
+
+spline:
+	$(MAKE) -C spline
+
+###############################################################################
+
+convexhull.o: convexhull.c convexhull.h
+	$(CC) $(CFLAGS) -c convexhull.c
+
+tpoint.o: tpoint.c tpoint.h
+	$(CC) $(CFLAGS) -c tpoint.c
+
+cpmatch.o: cpmatch.c cpmatch.h
+	$(CC) $(CFLAGS) -c cpmatch.c
+
+spmatrix.o: spmatrix.c spmatrix.h
+	$(CC) $(CFLAGS) -c spmatrix.c
+
+delaunay.o: delaunay.c delaunay.h
+	$(CC) $(CFLAGS) -c delaunay.c
+
+poly.o: poly.c poly.h
+	$(CC) $(CFLAGS) -c poly.c
+
+polyfit.o: polyfit.c polyfit.h
+	$(CC) $(CFLAGS) -c polyfit.c
+
+polygon.o: polygon.c polygon.h
+	$(CC) $(CFLAGS) -c polygon.c
+
+splinefit.o: splinefit.c splinefit.h
+	$(CC) $(CFLAGS) -c splinefit.c
+
+trimatch.o: trimatch.c trimatch.h
+	$(CC) $(CFLAGS) -c trimatch.c
+
+matrixvector.o: matrixvector.c matrixvector.h
+	$(CC) $(CFLAGS) -c matrixvector.c
+
+match.a: tpoint.o cpmatch.o spmatrix.o delaunay.o trimatch.o
+	$(AR) src match.a tpoint.o cpmatch.o spmatrix.o delaunay.o trimatch.o
+	$(RANLIB) match.a
+
+###############################################################################
+
+clean:
+	$(MAKE) -C dft clean
+	$(MAKE) -C elliptic clean
+	$(MAKE) -C expint clean
+	$(MAKE) -C fit clean
+	$(MAKE) -C intersec clean
+	$(MAKE) -C spline clean
+	rm -f *.o *.a

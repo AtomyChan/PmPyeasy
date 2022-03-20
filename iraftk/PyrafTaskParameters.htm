@@ -1,0 +1,353 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+<title>6 Task Parameters</title>
+<META NAME="description" CONTENT="6 Task Parameters">
+<META NAME="keywords" CONTENT="pyraf_guide">
+<META NAME="resource-type" CONTENT="document">
+<META NAME="distribution" CONTENT="global">
+<link rel="STYLESHEET" href="pyraf_guide.css">
+<link rel="first" href="pyraf_guide.html">
+<LINK REL="next" HREF="node7.html">
+<LINK REL="previous" HREF="node5.html">
+<LINK REL="up" HREF="pyraf_guide.html">
+<LINK REL="next" HREF="node7.html">
+</head>
+<body>
+<DIV CLASS="navigation">
+<table align="center" width="100%" cellpadding="0" cellspacing="2">
+<tr>
+<td><A HREF="node5.html"><img src="../icons/previous.gif"
+border="0" height="32"
+  alt="Previous Page" width="32"></A></td>
+<td><A HREF="pyraf_guide.html"><img src="../icons/up.gif"
+border="0" height="32"
+  alt="Up One Level" width="32"></A></td>
+<td><A HREF="node7.html"><img src="../icons/next.gif"
+border="0" height="32"
+  alt="Next Page" width="32"></A></td>
+<td align="center" width="100%">PyRAF Programmer's Guide</td>
+<td><img src="../icons/blank.gif"
+  border="0" height="32"
+  alt="" width="32"></td>
+<td><img src="../icons/blank.gif"
+  border="0" height="32"
+  alt="" width="32"></td>
+</tr></table>
+<b class="navlabel">Previous:</b> <a class="sectref" HREF="node5.html">5 Dealing with Errors</A>
+<b class="navlabel">Up:</b> <a class="sectref" HREF="pyraf_guide.html">PyRAF Programmer's Guide</A>
+<b class="navlabel">Next:</b> <a class="sectref" HREF="node7.html">7 Handy Functions</A>
+<br><hr>
+</DIV>
+<!--End of Navigation Panel-->
+
+<!--Table of Child-Links-->
+<A NAME="CHILD_LINKS"><STRONG>Subsections</STRONG></a>
+
+<UL CLASS="ChildLinks">
+<LI><A href="node6.html#SECTION000610000000000000000">6.1 Parameter Files, Parameter Lists</a>
+<LI><A href="node6.html#SECTION000620000000000000000">6.2 The uparm Copy of the Parameter File</a>
+<LI><A href="node6.html#SECTION000630000000000000000">6.3 Getting and Setting Parameters</a>
+</ul>
+<!--End of Table of Child-Links-->
+<HR>
+
+<H1><A NAME="SECTION000600000000000000000">&nbsp;</A>
+<BR>
+6 Task Parameters
+</H1>
+
+<P>
+One of the strengths of IRAF is the way it handles task parameters.
+The very useful IRAF commands <code>lparam, dparam, eparam, unlearn</code>
+are available in PyRAF with the same syntax.
+One significant difference is that
+<code>eparam</code> brings up a GUI parameter editor,
+rather than the IRAF text-based parameter editor.
+This section describes parameter files and in-memory parameter lists,
+the copy of a par file in the uparm directory,
+and a few useful methods for handling parameters and par files.
+
+<P>
+
+<H2><A NAME="SECTION000610000000000000000">
+6.1 Parameter Files, Parameter Lists</A>
+</H2>
+
+<P>
+Not every task has a parameter file,
+as was mentioned earlier
+(that was in the section on foreign tasks,
+but other tasks may lack parameter files as well).
+For a task that does have parameters,
+there is a template parameter file (or a CL script file)
+that specifies the default values, the types, and other information.
+This file is typically found in the package directory,
+has root name equal to the task name,
+and has extension ``.par'' (or ``.cl'').
+There is another copy of that parameter file
+in the user's <span class="file">uparm</span> directory,
+which by default is a subdirectory of the user's IRAF home directory.
+This copy is what is deleted when <code>unlearn</code> is used.
+After running <code>eparam</code> on a task,
+or after successfully executing the task,
+the copy in the uparm directory will be updated (or created, if necessary)
+to reflect the values set using <code>eparam</code>
+or specified when the task was run
+(but see below for further details).
+The name of the file in the uparm directory is somewhat garbled
+(``scrunched,'' in PyRAF terminology).
+The file name begins with the first two characters of the package
+that contains the task, followed by the last character of the package name
+(or just the package name if it is less than or equal to three characters).
+The rest of the root name is the first five characters of the task name
+and the last character of the task name
+(or just the task name if it is less than or equal to six characters).
+The extension is <span class="file">.par</span>.
+This scheme dates back to the 1980's,
+when file names on some operating systems were severely limited in length.
+For example, the uparm file names for <code>imcopy</code> and <code>imtranspose</code> are
+<span class="file">imlimcopy.par</span> and <span class="file">immimtrae.par</span> respectively
+(these tasks are in the imutil and imgeom subpackages of images).
+
+<P>
+PyRAF uses the same template and uparm parameter files,
+and there can also be in-memory copies of the parameters for a task.
+In the PyRAF code these parameter lists are called
+the _defaultParList, the _runningParList and the _currentParList.
+The default par list is what you have after a task is unlearned;
+the parameter values are copied from the template par file.
+The running par list is the set that is used when a task is run,
+i.e. it would include values assigned on the command line.
+If the task completes successfully,
+the running par list will be copied to the current par list
+and to the uparm copy of the parameter file (but see below).
+The current par list contains updates after running a task
+or by direct assignment to the parameters, e.g. using eparam.
+The current par list generally (but not always) agrees with the uparm file.
+
+<P>
+
+<H2><A NAME="SECTION000620000000000000000">
+6.2 The uparm Copy of the Parameter File</A>
+</H2>
+
+<P>
+It was stated above that the uparm copy of the parameter file
+will be updated after a task runs successfully.
+This is not always true.
+This section describes the conditions under which
+the uparm file will or will not be updated,
+and which parameter values will be modified.
+
+<P>
+If a task is executed using Python syntax,
+then the uparm copy of the par file will not be updated
+(unless the special boolean keyword <code>_save=1</code> was specified).
+This is the case regardless of whether the task
+is run interactively or in a Python script.
+On the other hand, if a task is run interactively using
+the ordinary command-line syntax that looks like IRAF's ``command mode,''
+then query/learn parameters (<code>mode="ql"</code> or <code>"al"</code>)
+will be updated in the uparm file;
+hidden parameters will not normally be updated.
+When using Python syntax, if <code>_save=1</code> is specified
+then query/learn parameters <EM>will</EM> be updated in the uparm file,
+i.e. the uparm update behavior is the same as when using command mode.
+Except for the _save keyword,
+this is intended to closely emulate
+the way IRAF handles updating the uparm file.
+The significant difference is that
+PyRAF either updates the uparm file or not
+depending on the syntax (IRAF's command mode vs. Python syntax).
+IRAF updates the uparm file if the task was run interactively,
+and it does not update the uparm file
+if the task was invoked from a script
+or was run as a background job.
+
+<P>
+Running a task in command mode normally does not result in
+hidden parameters (<code>mode="h"</code>) being updated in the uparm file.
+Parameters may be set explicitly,
+either by direct assignment (e.g. <code>iraf.imstat.fields="mean"</code>)
+or by calling the <code>setParam()</code> method.
+Doing so does not update the uparm file immediately;
+however, if the task is subsequently run in command mode,
+the values thus set will be updated in the uparm file,
+and this is so even if the parameters are hidden.
+
+<P>
+There are two simple ways to get an entire parameter list
+updated in the uparm copy of the par file,
+regardless of whether the parameters are query or hidden.
+One way is to run eparam and click on ``Save'';
+in this case all the parameters in the uparm file will be set
+to the values shown by eparam.
+The other way, which can conveniently be used in a script,
+is to call the <code>saveParList()</code> method for the task.
+
+<P>
+
+<H2><A NAME="SECTION000630000000000000000">
+6.3 Getting and Setting Parameters</A>
+</H2>
+
+<P>
+In PyRAF, IRAF tasks are <code>IrafTask</code> (or related) objects.
+Four of the most useful methods of this class are described below.
+
+<P>
+The IRAF CL syntax for printing the value of a task parameter is,
+for example, <code>print (fxheader.fits_file)</code>,
+or <code>=fxheader.fits_file</code>.
+A parameter may be set using similar syntax,
+<code>fxheader.fits_file = "xyz.fits"</code>.
+A similar syntax works in Python, too:
+<code>print iraf.fxheader.fits_file</code>,
+<code>iraf.fxheader.fits_file = "xyz.fits"</code>.
+The PyRAF methods <code>getParam()</code> and <code>setParam()</code>
+serve a similar purpose,
+and they allow more control over prompting (for query parameters),
+data type of the returned value,
+and access to the ``p_'' fields (described below).
+The first argument to <code>getParam()</code> and <code>setParam()</code>
+is <code>qualifiedName</code>,
+which in its simplest form is a parameter name.
+The ``qualified'' aspect means that the parameter
+may be qualified with a package name, task name, or field,
+with the various parts separated by periods.
+The parameter name may include an array index in brackets
+if the parameter is an array.
+If a package name is specified, then a task name must be given;
+otherwise, the package would appear to be a task name.
+
+<P>
+You may be wondering why one would give a task name,
+when these methods are already associated with an IRAF task object.
+The answer is that you can access the parameters of any loaded task this way.
+For example, <code>print iraf.imcopy.getParam("fxheader.fits_file")</code>
+and <code>print iraf.fxheader.getParam("fits_file")</code>
+are equivalent.
+To get the value of a parameter in the task's package,
+precede the parameter name with the ``<code>_.</code>'' qualifier;
+for example, <code>print iraf.imcopy.getParam("_.version")</code>
+prints the version parameter in the imutil package par file.
+The fields are referred to as ``parameter attributes''
+in the IRAF help page (type <code>phelp parameters</code>).
+The fields are
+<code>p_name, p_value, p_default, p_xtype, p_type, p_prompt,
+p_filename, p_minimum, p_maximum, p_mode</code>.
+In IRAF there is also a <code>p_length</code>, which is a maximum string length,
+but in PyRAF this is not needed and is not included.
+Note that for string and (in PyRAF) integer parameters,
+<code>p_minimum</code> is used for the list of allowed values; for example:
+
+<P>
+
+<dl><dd><div CLASS="alltt" align="left">
+<TT>
+ <tt><b>-&#45;&gt; print iraf.imarith.getParam(&#34;op.p_type&#34;)</b></tt>
+<BR>
+s
+<BR><tt><b>-&#45;&gt; print iraf.imarith.getParam(&#34;op.p_minimum&#34;)</b></tt>
+<BR>|+|-|*|/|min|max|
+<BR></TT>
+</div></dl>
+
+<P>
+The calling sequence for <code>getParam()</code> is
+<tt><b>getParam(qualifiedName, native=0, mode=None, exact=0, prompt=1)</b></tt>.
+The value will be gotten from the running par list if that is defined,
+or the current par list if that is defined,
+or the default par list.
+The value returned is by default a string;
+specifying <code>native=1</code> gives the value in the native type of the parameter.
+Minimum matching is supported unless <code>exact=1</code> was specified.
+The default <code>prompt=1</code> means that the current value will be printed
+to the terminal window,
+and the user will have the option to specify a new value.
+
+<P>
+The calling sequence for <code>setParam()</code> is
+<tt><b>setParam(qualifiedName, newvalue, check=1, exact=0)</b></tt>.
+The value will be set in the running parameter list if that is defined,
+or the current par list if that is defined.
+Values set don't typically appear in
+the copy of the file in the uparm directory
+until after the task has been run successfully.
+The parameter fields that may be set are
+<code>p_value, p_prompt, p_filename, p_minimum, p_maximum, p_mode</code>.
+The default <code>exact=0</code> means that minimum matching is supported,
+but exact can be set to 1 to require an exact match.
+The default <code>check=1</code> means that the specified parameter value
+will be compared with the minimum and maximum allowed values
+(or the choice list, for a string),
+and a value that is out of range will not be accepted.
+However, sometimes one wants to give an out-of-range value,
+e.g. for testing how the task deals with it,
+and that can be done by specifying <code>check=0</code>.
+
+<P>
+<tt><b>saveParList(filename=None)</b></tt>
+writes the current parameter list to <code>filename</code>,
+or to the file in the uparm directory if <code>filename</code> was not specified.
+The format of such a file is a standard IRAF parameter file.
+
+<P>
+Parameters can be restored from a file using <tt><b>setParList()</b></tt>,
+with the file specified using the special keyword <code>ParList</code>.
+The keyword value can be either a file name or an <code>IrafParList</code> object.
+If a file name is given, the filename extension must be <span class="file">.par</span>.
+An alternative is to specify the special keyword <code>ParList</code>
+when running the task.
+
+<P>
+
+<dl><dd><div CLASS="alltt" align="left">
+<TT>
+ <code>-&#45;&gt; # Save the parameters to the file hedit.par.</code>
+<BR><tt><b>-&#45;&gt; iraf.hedit.saveParList(filename=&#34;hedit.par&#34;)</b></tt>
+<BR><code>-&#45;&gt; # Restore the parameters from the file, and then run hedit.</code>
+<BR><tt><b>-&#45;&gt; iraf.hedit.setParList(ParList=&#34;hedit.par&#34;)</b></tt>
+<BR><tt><b>-&#45;&gt; iraf.hedit(mode=&#34;h&#34;)</b></tt>
+<BR><code>-&#45;&gt; # Alternatively, restore parameters from saved file</code>
+<BR><code>-&#45;&gt; # and run hedit in one call.</code>
+<BR><tt><b>-&#45;&gt; iraf.hedit(ParList=&#34;hedit.par&#34;)</b></tt>
+<BR></TT>
+</div></dl>
+
+<P>
+
+<DIV CLASS="navigation">
+<p><hr>
+<table align="center" width="100%" cellpadding="0" cellspacing="2">
+<tr>
+<td><A HREF="node5.html"><img src="../icons/previous.gif"
+border="0" height="32"
+  alt="Previous Page" width="32"></A></td>
+<td><A HREF="pyraf_guide.html"><img src="../icons/up.gif"
+border="0" height="32"
+  alt="Up One Level" width="32"></A></td>
+<td><A HREF="node7.html"><img src="../icons/next.gif"
+border="0" height="32"
+  alt="Next Page" width="32"></A></td>
+<td align="center" width="100%">PyRAF Programmer's Guide</td>
+<td><img src="../icons/blank.gif"
+  border="0" height="32"
+  alt="" width="32"></td>
+<td><img src="../icons/blank.gif"
+  border="0" height="32"
+  alt="" width="32"></td>
+</tr></table>
+<b class="navlabel">Previous:</b> <a class="sectref" HREF="node5.html">5 Dealing with Errors</A>
+<b class="navlabel">Up:</b> <a class="sectref" HREF="pyraf_guide.html">PyRAF Programmer's Guide</A>
+<b class="navlabel">Next:</b> <a class="sectref" HREF="node7.html">7 Handy Functions</A>
+<hr>
+
+</DIV>
+<!--End of Navigation Panel-->
+<ADDRESS>
+<table><tr><td><a href="index.html"><img src="../icons/pyraflogosmall_weblight.gif" border=0 width=94 height=111 align="center"></a></td> <td><address>Questions or comments? Contact <a href="mailto:help@stsci.edu">help@stsci.edu</a><br> Documented updated on </address></td></tr></table>
+</ADDRESS>
+</BODY>
+</HTML>

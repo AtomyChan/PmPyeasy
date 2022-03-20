@@ -1,0 +1,8 @@
+GAIN      = 2.5
+MIN_LEVEL = 1.0
+SAT_LEVEL = 29000.0
+NX        = 512
+NY        = 538
+MARG      = 20
+FITS      = fits
+END

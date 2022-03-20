@@ -1,0 +1,17 @@
+SHELL=/bin/sh
+
+CC=@CC@
+AR=@AR@
+LD=@LD@
+
+CFLAGS=@CFLAGS@
+
+all: pbfft.o 
+
+.PHONY: all clean
+
+pbfft.o: pbfft.c pbfft.h
+	$(CC) $(CFLAGS) -c pbfft.c
+
+clean:
+	rm -f *.o *.a

@@ -1,0 +1,14 @@
+MOHW = 5
+SMHW  = 4
+N_SIG = 2
+SIG_X = 1.5
+SIG_Y = 1.5
+C_MIN = 0.4
+APRAD  = 10.0
+ANRAD1 = 20.0
+ANRAD2 = 25.0
+ABS_THRESH = -1.0
+SIG_THRESH = 3.5
+BKG_ALG = mode	// supported modes are: mode, median, mean
+VERBOSE = 1
+END

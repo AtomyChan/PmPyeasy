@@ -1,0 +1,21 @@
+SHELL=/bin/sh
+
+CC=@CC@
+AR=@AR@
+LD=@LD@
+RANLIB=@RANLIB@
+
+CFLAGS=@CFLAGS@
+
+all: lmfit.o downhill.o
+
+.PHONY: all clean
+
+lmfit.o: lmfit.c lmfit.h
+	$(CC) $(CFLAGS) -c lmfit.c
+
+downhill.o: downhill.c downhill.h
+	$(CC) $(CFLAGS) -c downhill.c
+
+clean:
+	rm -f *.o *.a

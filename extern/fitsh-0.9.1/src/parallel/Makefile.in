@@ -1,0 +1,26 @@
+SHELL=/bin/sh
+
+CC=@CC@
+AR=@AR@
+LD=@LD@
+
+CFLAGS=@CFLAGS@
+
+all: parallel.a
+
+.PHONY: all clean
+
+none.o: none.c parallel.h
+	$(CC) $(CFLAGS) -c none.c 
+
+ipc.o: ipc.c parallel.h
+	$(CC) $(CFLAGS) -c ipc.c
+
+parallel.o: parallel.c parallel.h
+	$(CC) $(CFLAGS) -c parallel.c
+
+parallel.a: none.o ipc.o parallel.o 
+	$(AR) src parallel.a none.o ipc.o parallel.o
+
+clean:
+	rm -f *.o *.a

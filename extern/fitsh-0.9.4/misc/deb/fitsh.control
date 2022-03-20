@@ -1,0 +1,27 @@
+Package: fitsh
+Version: __VERSION__
+Section: utils
+Priority: optional
+Architecture: __ARCH__
+Depends: libc6 (>= 2.3.2)
+Installed-Size: __INSTALLED_SIZE__
+Maintainer: Andras Pal <apal@szofi.net>
+Source: fitsh
+Description: Software package for astronomical image processing
+ This software package provides independent binary programs (so called tasks) 
+ which performs various steps of astronomical image reduction and  data 
+ processing. These tasks are designed for execution from a UNIX command line 
+ shell or shell script. Each of these tasks performs a specific operation 
+ (e.g. transforming an image to another reference frame, search and identifiy 
+ stars or other point-like sources, do photometry, transform/display a 
+ FITS image to a popular graphics format, ...) while the details of a 
+ certain operation are specified via command switches and arguments. 
+ Therefore this package does not need any higher level operating environment 
+ than a standard UNIX shell, however, processing the related data might 
+ require a little more knowledge of the used shell itself. If you find this 
+ program useful in your research, please cite 2012MNRAS.421.1825P
+ as "2012, MNRAS, 421, 1825". See also the web page of the project, found at 
+ https://fitsh.net/. That page gathers information about the program 
+ (including documentation and examples), this is the primary download source 
+ of the package itself, and additionally, serves a public forum for the 
+ program users in various topics. Bug reports, comments and ideas are welcomed!

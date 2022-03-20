@@ -1,0 +1,39 @@
+0.9.1: new features, changes and fixes since FITSH version 0.9.0
+================================================================
+ * fix: lfit/linear.so: -dylib argument is fixed on Mac/OSX targets. 
+ * new: fiphot: from now, a formally zero gain (--gain 0) imply an "infinite" 
+	gain, i.e. no photon noise from the detector. It can be conveniently 
+	used for photometry on images of instruments where photon noise is not 
+	an issue (e.g. Hersche/PACS images) or when photon noise is completely
+	negligible (e.g. photometry of very faint targets).
+ * new: fiarith: new per-image functions sign(.) and theta(.) are added.
+	sign(.) is the standard sign function while theta(.) is 
+	the Heaviside step function (that is zero for negative numbers
+	and unity for non-negative numbers).
+ * fix: fiphot: some minor bug fixes related to the polynomial gain 
+	variation handling.
+ * new: fitrans: simple image shift operations can be implied now
+	using the -e or --shift command line options. 
+ * fix: lfit: the LIBC/math calls of finite(.) have been replaced to 
+	isfinite(.).
+ * chg: The `fizip` and `fiunzip` tasks are removed from the whole package.
+	We suggest to use the more sophisticated, faster and standard
+	FITS compression tools `fpack` and `funpack`, that works nicely
+	in parallel with the task of the FITSH package (not transparently, but
+	standard input/output pipes can be built easily). As of now, a native 
+	support for the tile compression method used by `fpack`	and `funpack` 
+	is not planned. 
+ * chg: Some standard project files (./AUTHORS, ./CHANGELOG, ./COPYING, 
+	./INSTALL and ./README) have been added to the source tree. 
+ * new: The target `make deb` creates a Debian package on the current 
+	architecture (this feature requies the `dpkg-deb` utility and also
+	depends on the `help2man` program in order to create the manual pages
+	that also should go into the Debian package). 
+ * new: Related to the new `make deb` target, the subdirectory ./deb (currently
+	with two files) has been created in the source tree. 
+
+0.9.0
+=====
+ * new:	The first public release of the FITSH package. See ./README and the 
+	inline reference manuals (--long-help) for further details. 
+	See also ./INSTALL for installation tips. 

@@ -1,0 +1,78 @@
+FITSH - a software package for astronomical image processing - version 0.9.1
+****************************************************************************
+
+This software package provides a set of independent binary programs 
+(tasks) that are designed for execution from a UNIX command line shell 
+or shell script. Each of these tasks performs a specific operation (e.g. 
+transforming an image to another reference frame, search and identifiy 
+stars or other point-like sources, do photometry, transform/display a 
+FITS image to a popular graphics format, ...) while the details of a 
+certain operation are specified via command switches and arguments. 
+Therefore this package does not need any higher level operating 
+environment than a standard UNIX shell, however, processing the related 
+data might require a little more knowledge of the used shell itself (the 
+related documentation and examples found in this page use the bash 
+shell). Additionally, some of the processing steps might require minor 
+or basic operations performed with other tools like awk or text 
+processing utilities (sort, uniq, paste, ...).
+
+For a brief summary about the individual tasks, check the ``Tasks'' 
+section of the web page of the project, namely at 
+http://fitsh.szofi.net/task
+
+Supported systems and requirements
+----------------------------------
+
+Actually, the program has been developed under GNU/Linux (Debian, i386 
+and amd64), and it also tested and seems to work properly on Sun/SunOS, 
+PC/NetBSD and Mac/OSX systems as well. The Mac/OSX port has been tested 
+under the version 10.6.8 (Snow Leopard) with its default GCC 
+(gcc-4.2.1).
+
+However, please note that the primary development platform of the 
+package is Debian GNU/Linux, thus compilation-time warnings might occur 
+on other operating systems.
+
+Documentation
+-------------
+
+The FITSH tasks have a built-in self-explaining reference documentation 
+system, that can be asked using the --long-help option. The format of 
+this long-help output is a standard to the `help2man` utility, with 
+which nice manual pages can be generated easily (and then these can be 
+converted to PDF or PostScript as well). See also the `make help2man` 
+Makefile-target: this target builds the manual pages as well as converts 
+them into PostScript format if the utilities `help2man` and `groff` 
+are installed properly on the host operating system. 
+
+The web page of the project (http://fitsh.szofi.net) also displays these 
+manual pages as well as one can find further, completely working 
+examples.
+
+Copyright
+---------
+
+This software was written by Andras Pal. Earlier versions
+of the code have been developed for the Hungarian-made Automated 
+Telescope (HAT) project to make the data processing easier
+and more convenient. Further (and current) development is supported
+by the ESA PECS grant no. PECS 98073. 
+
+The FITSH package is a free software, available under the terms of 
+GPLv3 (see ./COPYING for a full license).  This program is free 
+software: you can redistribute it and/or modify it under the terms of 
+the GNU General Public License as published by the Free Software 
+Foundation, either version 3 of the License, or (at your option) any 
+later version.
+
+This program is distributed in the hope that it will be useful, but 
+WITHOUT ANY WARRANTY; without even the implied warranty of 
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU 
+General Public License for more details.
+
+Bug reports, comments and ideas are welcomed, send these to apal@szofi.net.
+See also the web page of the project, found at http://fitsh.szofi.net/. 
+That page gathers information about the program (including documentation 
+and examples), this is the primary download source of the package itself, 
+and additionally, serves a public forum for the program users in 
+various topics.

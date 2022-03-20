@@ -1,0 +1,160 @@
+CCDProc Release Notes
+Notes are stored in reverse chronological order
+
+V1.5 (2005 Jan 21): [rwp/osu]
+------------------
+
+Added the imstat function to compute min, max, mean, mode, sigma
+for an image.  The mode is crude (peak of histogram), nothing
+fancy like fitting a parabola to a histogram peak or other, so the
+routine should be viewed as only for quick-n-dirty analysis of an
+image, not science analysis.  Sigma is similarly an approximation
+form, not a 2-pass calculation.  Stats can be computed in the whole
+image (default) or a subframe.  Type imstat for the syntax.
+
+V1.4p3 (2004 Sept 23): [rwp/osu]
+---------------------
+
+Added the normalize and dicer programs to the suite.  Documentation
+will be forthcoming, but in brief:
+
+   normalize - divide all pixels in an image by the mean intensity across
+               the entire image (or in an image subset), to create a
+               normalized image (e.g., for making normalized flats)
+
+   dicer - dice a larger image into multiple subimages (much more efficient
+           than running ccdproc with different trim boxes multiple times).
+
+Collectively released as patch 3 of the package
+
+
+flt2int v0.1 (2003 Aug 4): [rwp/osu]
+-------------------------
+
+Converts BITPIX=-32 to BITPIX=16 with data editing to [0..65534] to
+avoid discretization errors on coersion into 16-bit signed integers.
+Should be used only to convert single, uncombined images that have been
+output as BITPIX=-32 into BITPIX=16.  
+
+
+V1.4p2 (2001 Oct 18): [rwp/osu]
+--------------------
+
+Stephen Kane found that the -a (average) option was giving incorrect
+numbers.  Running it down, I found an error in the addition routines
+whereby imcombine was not adding the last image in the stack.  This was
+fixed and v1.1 of imcombine was released, constituting "patch 2" to
+V1.4.
+
+V1.4p1 (2001 Jan 22): [rwp/osu]
+--------------------
+
+Bug in ImDiv whereby we were getting the memory registers out of synch
+has been fixed.  This only affected cases where the flat field images
+had pixels with data values = 0.0.  Andrew Williams (Perth Obs) reported
+this bug.
+
+
+V1.4 (1999 Aug 8): [rwp/osu]
+-----------------
+
+Added code to do dark subtraction.  In the processing model adopted
+here, dark frames are preprocessed either OT or OTZ prior to applying
+them to object frames.  Dark subtraction comes between zero subtraction
+and flat-field correction (you don't want to subtract dark counts
+after the flat-field division has "flattened" the pixel-to-pixel gain
+variations across the detector).  Code has been added to include
+the "DARK" function in proc files.
+
+
+V1.3p2 (1999 July 2): [rwp/osu]
+--------------------
+
+Fixed odd bug in which the FWHMSKY would cause a segmentation fault
+crash.  The cause appears to be a bad function prototype in CCDProc.h
+(actually, no function prototype to speak of for gparam).  Unclear why
+this never surfaced before.  It was causing bad values of the gain to
+be passed to gparam.  Also instituted full Y2K-compliant date tags.
+Kind of ugly, but does the job (ISO8604 is not always pretty).
+
+
+V1.3p1 (1999 June 1): [rwp/osu]
+--------------------
+
+Fixed a voodoo bug with writing SHORT images that seems to be related
+to stale header info in CFITSIO.  Didn't see it in earlier versions,
+but I can't figure out what.  Fixed it with a hack (open then close
+the input file after reading the data) that seems to do the trick.
+Weird stuff.  Also added an extra argument to FITSError to let me get
+a little more debug info on FITS crashes.  Thanks to Andy Stephens for
+sniffing out this one.
+
+
+V1.3 (1999 May 27): [rwp/osu]
+------------------
+
+ccdproc and imcombine now have a Makefile instead of the gccfits
+script for compilation.  Make is the right thing to do, and should
+make adding things more transparent to the casual user.  00README file
+has been updated accordingly.
+
+Fixed minor bugs in getparam.c, in which the modal sky values were
+being systematically underestimated, and subject to 5.333 (16/3) ADU
+discretization noise due to using very coarse bins.  This was
+accomplished by changing nhist to 32000 instead of 6000.  Only makes a
+minor performance impact (same time to build the histogram, but takes
+a little longer to search it).  The major time hit is still in the PSF
+fitting, so this is incremental at best.
+
+Tested this version of the code with CFITSIO v2.031 (released 1999
+March 31) and found no problems.  People trying to build CFITSIO on
+SunOS with mixed gcc and sun compilers *may* need to tweak the
+makefile as there is some include file conflicts in poorly configured
+systems (based on experience with the SunOS systems at OSU, your
+mileage may vary).
+
+----------------------------------------------------------------
+
+V1.2 (1998 Nov 23): [rwp/osu]
+------------------
+
+Fixed bug in getfwhm (in gparam.c) in which if a star used to estimate
+the FWHM is within 80 pixels of the image boundary it overwrites the
+image.  Also added a MAXSTARS parameter to gparam.c to allow us to set
+the max number of stars used for FWHM calculations at compile time
+(rather than hardwiring 20).  Recast routines in gparam.c slightly to
+use ANSI-style function prototypes, and to isolate printf's inside of
+#defs.  This lets us reinstate the diagnostic printouts by defining
+__DEBUG at compile time.
+
+Tested this version with v2.024 of CFITSIO, which includes support for
+the new Year2000-compliant FITS date/time format, and fixes some bugs
+over version 1.42.  No problems adopting the latest version of CFITSIO
+for ccdproc or imcombine.
+
+Added imcombine program to this release.  
+
+----------------------------------------------------------------
+
+V1.1 (1998 June 2): [rwp/osu]
+------------------
+
+That didn't take long.  Checking it out myself, I found a bug in the module
+of ccdproc.c (main) that writes the FITS header cards for the FWHMSKY
+estimation.  TSMAX was mis-spelled as TMSAX, hence subsequent programs
+could not find the header card when correctly spelled.
+
+Dyslexia really sucks.
+
+----------------------------------------------------------------
+
+V1.0 (1998 May 27): [rwp/osu]
+------------------
+
+First non-beta release, with HTML documentation
+
+	http://www.astronomy.ohio-state.edu/~pogge/PLANET/CCDProc/
+
+distributed to PLANET consortium for testing and evaluation. 
+
+

@@ -1,0 +1,26 @@
+SHELL=/bin/sh
+
+CC=@CC@
+AR=@AR@
+LD=@LD@
+
+CFLAGS=@CFLAGS@
+
+all: link.a floodfill.o
+
+.PHONY: all clean
+
+link.a: linkpoint.o linkblock.o 
+	$(AR) src link.a linkpoint.o linkblock.o 
+
+floodfill.o: floodfill.c floodfill.h
+	$(CC) $(CFLAGS) -c floodfill.c
+
+linkpoint.o: linkpoint.c linkpoint.h link.h
+	$(CC) $(CFLAGS) -c linkpoint.c
+
+linkblock.o: linkblock.c linkblock.h link.h
+	$(CC) $(CFLAGS) -c linkblock.c
+
+clean:
+	rm -f *.o *.a

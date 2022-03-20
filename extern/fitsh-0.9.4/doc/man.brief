@@ -1,0 +1,16 @@
+fiarith 	evaluating arithmetic expressions on images as operands
+ficalib 	performing various calibration steps on the input images
+ficombine 	combining (most frequently, averaging) a set of images
+ficonv 		obtaining and evaluating convolution transformations
+fiheader 	reading and manipulating FITS header keywords
+fiign 		low-level manipulation of masks associated to FITS images
+fiinfo 		providing information or image stamps for images
+fiphot 		performing photometry on normal or subtracted images
+firandom 	generates artificial object lists and simulated images
+fistar 		detecting and characterizing point-like sources
+fitrans 	performing spatial transformations on the input image
+grcollect 	performing transposition on the input tabulated data
+grmatch 	pairing lines by involving identifier or cross matching
+grtrans 	transforming coordinate lists or fitting such transformations
+gropt		performing ray tracing computation of optical systems
+lfit		general purpose evaluation and regression analysis tool

@@ -1,0 +1,7 @@
+outline the steps on how to integrate image-subtraction to the photometry pipeline:
+
+0. image registration and obtaining basic information on images 
+
+1. build the template image. multiple options available: first simple one is select single image as template image
+
+2. 

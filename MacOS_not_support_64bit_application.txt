@@ -1,0 +1,8 @@
+
+macOS versions Catalina (10.15) and BigSur (11)  do not allow any longer 32-bit executables to run
+https://en.wikipedia.org/wiki/MacOS_version_history
+
+For MacOS users with versions Catalina or higher, one solution to use iraf is through virtual machine, for example ubuntu virtual machine by multipass:
+https://research.iac.es/sieinvens/siepedia/pmwiki.php?n=HOWTOs.IRAFMultipassMacOS
+
+

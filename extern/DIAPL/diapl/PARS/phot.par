@@ -1,0 +1,12 @@
+APRAD     = 10.0         // Aperture radius
+FITRAD    = 10.0         // PSF fiting radius
+NORMRAD   = 15.0         // PSF normalization radius
+ANRAD1    = 20.0         // Background annulus inner radius
+ANRAD2    = 25.0         // Background annulus outer radius
+BKG_MODE  = 0            // Background mode (0=const=0; 1=median)
+NSIG_BKG  = 2.0          // Sigma clipping threshold
+BAD_VALUE = -99999.99    // Bad value
+ERR_CODE  = 65000.0      // Error code
+DBFORM    = A            // Output database format: A=ASCII, B=binary
+VERBOSE   = 1            // Verbosity level: 0=quiet, 1, 2, ...
+END

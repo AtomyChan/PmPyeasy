@@ -1,0 +1,20 @@
+SHELL=/bin/sh
+
+CC=@CC@
+AR=@AR@
+LD=@LD@
+
+CFLAGS=@CFLAGS@
+
+all: sort.o multiindex.o
+
+.PHONY: all clean
+
+sort.o: sort.c sort.h
+	$(CC) $(CFLAGS) -c sort.c 
+
+multiindex.o: multiindex.c multiindex.h
+	$(CC) $(CFLAGS) -c multiindex.c
+
+clean:
+	rm -f *.o

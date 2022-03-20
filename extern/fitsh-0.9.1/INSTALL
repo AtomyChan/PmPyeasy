@@ -1,0 +1,31 @@
+FITSH - Installation 
+*********************
+
+Standard local installation:
+----------------------------
+
+The `FITSH` package can be installed using the standard 
+
+`./configure && make && make install`
+
+procedure. A more detailed description about the package and the 
+installation is available on the web page of projects, found at 
+http://fitsh.szofi.net/.
+
+Install as a Debian package:
+----------------------------
+
+Alternatively, you can install this program as a Debian package. 
+After `./configure && make`, use the target `make deb` to create the 
+*.deb file. This feature requires the `help2man` utility as well as 
+the `dpkg-deb` program to be installed on your system. If the *.deb
+file (named something like "fitsh_0.9.1_amd64.deb") is created successfully,
+use the `dpkg` command to install it:
+
+`dpkg --install fitsh_0.9.1_amd64.deb`
+
+Then, you can use any of your favourite *.deb package manager (dpkg, apt,
+dselect, synaptic, ...) to manage this package. After installing `FITSH` as 
+a Debian package, the manual pages also automatically become available for 
+the `man` command, in section (1). 
+

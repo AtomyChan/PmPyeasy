@@ -1,0 +1,85 @@
+
+imcombine - sum (or average) a set of FITS images
+
+USAGE: 
+  imcombine [-anBslh] outfile infile1 infile2 ...
+
+OPTIONS:
+  outfile is the FITS image to create
+  infile1 infile2 ... are the input FITS images
+  -a = average instead of sum
+  -n = normalize to mean of 1.0
+  -Bsc:ec,sr:er = coordinates of box for -n, default is whole image
+  -s = output short integer (BITPIX=16), default is FLOAT
+  -l = output long integer (BITPIX=32), default is FLOAT
+
+  -h = print "help" message (usage message) and exit
+
+Combines together a set of images by either summation or averaging
+(simple unweighted arithmetic mean).  Can also generate an image
+normalized to mean=1.0 by computing the mean data value within a given
+region of interest.
+
+EXAMPLES:
+
+       imcombine -l mb9804.fits mb9804.001 mb9804.002 mb9804.003
+
+sum together mb9804.001 thru mb9804.003, creating the file mb9804.fits
+with long-integer (BITPIX=32) format data.  Another way to do this would
+have been to type:
+
+       imcombine -l mb9804.fits mb9804.00[1-3]
+
+or
+
+       imcombine -l mb9804.fits mb9804.00*
+
+if all of the mb9804.00* files in the current directory are the ones of
+interest.  In general, use wildcards with caution.
+
+A mean of a stack of images may be computed using the command:
+
+       imcombine -a mzero.fits zero*.fits
+
+which creates a mean zero frame, mzero.fits, from zero frames zero*.fits
+in the current working directory.
+
+To make a normalized mean flat, you would issue the following command:
+
+       imcombine -a -n -B17:528,1:512 mvflat.fits vflat.00*.fits
+
+which creates a mean normalized flat, mvflat.fits, from files
+vflat.00*.fits, normalizing to 1.0 within the region of interest defined
+by the box bounded by coordinates [17:528,1:512].
+
+COMPILING:
+
+imcombine uses the CCDPRoc.h header file and the same set of prototypes.
+It is therefore able to be compiled using the gccfits script provided
+with the PLANET CCDProc distribution:
+
+       gccfits imcombine
+
+This guarantees that imcombine is compiled with the HEASARC cfitsio
+libraries.
+
+EXTERNAL LIBRARIES:
+
+imcombine uses the HEASARC cfitsio library, which is available online 
+at URL:
+
+       http://heasarc.gsfc.nasa.gov/docs/software/fitsio/
+
+DISTRIBUTION:
+
+imcombine will be distributed with version v1.2 of the ccdproc
+program, although it is currently available as an add-on with
+v1.1 (current version at URL:
+
+       http://www.astronomy.ohio-state.edu/~pogge/PLANET/
+
+AUTHOR:
+
+        R.W. Pogge
+        OSU Astronomy Dept.
+        3 June 1998

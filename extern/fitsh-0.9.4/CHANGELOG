@@ -1,0 +1,177 @@
+0.9.4: new features, changes and fixes since FITSH version 0.9.3
+================================================================
+ * new: `fitrans` support truncated mean based averaging during shrink 
+	operations (besides simple mean and median)
+ * new: support for tangential Brown-Conrady optical distortion parameters
+	up to the 4th order in `grtrans`.
+ * new: `grtrans` supports a cutoff at a maximum (radial) distance 
+	in the case of celestial projections. 
+ * new: computation of astrometric centroids (i.e. flux-weighted coordinates)
+	for arbitary (polygonal) apertures.
+ * new: support of differential photometry for arbitary (polygonal) apertures.
+ * new: auxiliary task `tvmark` supports setting the region width parameter
+	from command line. 
+ * new: dhjd() and dbjd() functions returing HJD-JD and BJD-JD differences
+	are natively supported by `lfit` built-in library. 
+ * fix: missing options from --help and/or --long-help lists are added
+ * fix: minor bugfixes (possibly unitialized variables, etc.)
+ * fix:	minor fixes in the derivation of the `fitrans` output file names.
+ * fix: stray source files (wcs.c, wcs.h) have been removed from the 
+	source tree. 
+
+0.9.3: new features, changes and fixes since FITSH version 0.9.2
+================================================================
+ * new: `grtrans` support fully SO(3) compliant projections,
+	characterized by either RA/DEC/ROLL or quaternions. 
+ * fix: fixes in the tensor allocators regarding to the proper 
+	operations in 64-bit architectures and large images. 
+ * new: the new task `gropt` has been added to the source. This is a 
+	pleriminary (highly experimental) verison, so there might be more
+	serious changes in the command line parameters in future releases.
+ * new: truncated and winsorized means have been added to `ficombine`.
+	See `ficalib --mode ...` (and --long-help) for more details. 
+ * new: `lfit` is capable to print the info about the built-in functions
+	in Mediawiki markup language. 
+ * new: support for long (HIERARCH) FITS keywords.
+ * new: new output types `grmatch`: --output-matched-reference and 
+	--output-matched-input: these print only the lines from the 
+	reference and input file, respectively.
+ * new: `grmatch` is capable to use abitrary separators for tokenizing the
+	reference and input file lines. See the new options 
+	--separator-input and --separator-reference (useful for matching CSVs).
+ * fix: the WCS fitting features of `grtrans` has been refactored and fixed
+	according to the current FITS standards. It works properly for 
+	wide-field (~35 degs diagonal) images at the accuracy level of few
+	arcseconds. 
+ * chg: `grtrans`: the command line argument --wcs is changed to --proj (or 
+	--projection). However, --wcs is still accepted as an alias for --proj. 
+	This change reflects that running `grtrans` in projection and/or 
+	inverse projection mode does not relate directly to FITS WCS keywords. 
+	However, there is a significant overlap within the functionalities, 
+	hence --wcs is still kept as an alias.
+ * new: `grtrans` accepts the k1, k2, k3 and k4 coefficients in the argument of
+	--projection (or --wcs) command line options. These coefficients 
+	are related to the Brown-Conrady optical distortion parameters up to
+	the fourth order. Currently, `grtrans` is capable to compute 
+	radial Brown-Conrady distortions up to the 4th order. 
+	Note that in the cases when FITS WCS keywords are obtained, these
+	parameters are ignored since the FITS WCS standard do not (currently)
+	supports this type of distortions. Note also that tangential
+	(or decentering) distortions are not supported now. 
+ * new: `grmatch` computes the ratios of the convex hulls of the input and
+	matched set of points in the case of point match algorithms. This
+	ratio is written in the structured comment second of the 
+	transformation and match files.
+ * new: `ficombine` accepts the "--no-history" command line argument. If
+	this argument is specified, `ficombine` won't include the (likely 
+	lengthy) FI_HSTRY keywords into the header.
+ * new: `ficombine` adds the keywords NCOMBINE and MCOMBINE, showing the 
+	number of images used for combination and the combination mode, 
+	respectively. For the mode, see also `ficombine --mode ...`.
+ * new: `fiphot` accepts the argument --correlation-length in order to compute
+	properly the background noise in the case of zoomed images. 
+ * fix: `fistar` output format fixed (it accepts now S, D, and K, which is 
+	implied by the manual).
+ * new: `fiheader` output format (see --format) accept now the tag "list",
+	which prints all of the matching keyword values in a single line.
+	For instance use `fiheader img*.fits -g naxis1,naxis2 -F filename,list` 
+	to produce lists with three columns for each img*.fits file 
+	(i.e. the columns are the filename and the NAXIS1 and NAXIS2 values)
+ * new: the "fitsh" source tree now includes the demonstration scripts 
+	`imexam`, `vizquery` and `tvmark`. Only `imexam` depends on FITSH,
+	itself but the other ones are also useful for various analyses.  
+	These bash-scripts are located in the newly created directory ./tools. 
+
+0.9.2: new features, changes and fixes since FITSH version 0.9.1
+================================================================
+ * fix: many parts related to "unused-but-set variables" are fixed.
+ * new: a custom random generator library `librandom` has been
+	added to the source tree: the standard libc functions (srand48(),
+	drand48(), etc.) have been replaced by the calls provided by
+	this `librandom` library. 
+ * fix: some minor fixes in the Makefile.in templates.
+ * fix: Makefiles can safely be run in paralell now. This is due to a tiny
+	hack (i.e. the make calls itself on the same directory) but works fine.
+ * fix: some minor fixes in the ./deb/fitsh.control template.
+ * new: the ./configure.mingw32 and ./configure.mingw64 script has been added 
+	and the configure.in emplate has been fixed in accordance with the 
+	requirements of the MINGW compilers. Hence, is it possible now to 
+	create MS Windows executables on systems where the MINGW compilers
+	have been properly installed. Note that some FITSH features
+	which are highly UNIX specific, won't work in these MS Windows
+	environment or executables. 
+ * fix: ./Makefile.in: `make deb` target has been fixed 
+	(there isn't any /bin/bash specific commands)
+ * fix: lazy evaluation bug in fitsmask.c:213 and :216 has been fixed.
+ * obs: `grtfilter` and `grselect` has been removed from the source tree. 
+	The functionality intended to be providedby `grtfilter` can be 
+	implemented by `lfit`. The task `grselect` can be replaced by 
+	using `awk` or some similar basic text processing tool. 
+ * new: support for high dynamics (16-bit) PNM output is added to `fiinfo`.
+ * new: support for --help-wiki output, which results a simple but elegant
+	summary page about the available command line options using the 
+	Mediawiki markup language. The output can then be copied to any
+	Mediawiki-based system (see also http://fitsh.net/wiki/).
+ * new: support for simple polygon shaped apertures. See e.g. Fig 2.
+	of http://arxiv.org/abs/1609.02760 for an application of such 
+	apertures.
+ * obs: the support for various coordinate basis systems has been expunged
+	from the full source. for backward compatibiliy, only the 
+	interpretation (and silent ignorance) of the "basissift" keyword
+	is kept which is found in transformation files. The only coordinate
+	basis is now the native one, in which the coordinate of the 
+	lower-left corner of the lower-left pixel is (0,0). This implies
+	a shift w.r.t to the system used by IRAF where the center of the
+	lower-left pixel is (1,1) since in IRAF system, the lower-left corner 
+	of the lower-left pixel is (0.5,0.5). 
+ * fix: parts of the code related to varios --help outputs have been fixed
+ * fix: some common declarations and header files have been fixed
+ * fix: minor fixes after testing at debian/stretch/gcc-6.1.1
+ * new: testing and minor fixes related to the support for CLANG and TinyCC
+ * fix: some obsolete checks have been removed from ./configure
+ * fix: the subdirectory ./src/parallel has been removed from the source tree
+ * fix: internal debian package creation files have been moved to ./misc/deb
+ * fix: some fixes in the `make install` and `make uninstall` targets
+ * new: the directory ./man has been created with the man pages of the 
+	various tasks found in this package. This directory is shipped with
+	the upstream package as well. 
+
+0.9.1: new features, changes and fixes since FITSH version 0.9.0
+================================================================
+ * fix: lfit/linear.so: -dylib argument is fixed on Mac/OSX targets. 
+ * new: fiphot: from now, a formally zero gain (--gain 0) imply an "infinite" 
+	gain, i.e. no photon noise from the detector. It can be conveniently 
+	used for photometry on images of instruments where photon noise is not 
+	an issue (e.g. Hersche/PACS images) or when photon noise is completely
+	negligible (e.g. photometry of very faint targets).
+ * new: fiarith: new per-image functions sign(.) and theta(.) are added.
+	sign(.) is the standard sign function while theta(.) is 
+	the Heaviside step function (that is zero for negative numbers
+	and unity for non-negative numbers).
+ * fix: fiphot: some minor bug fixes related to the polynomial gain 
+	variation handling.
+ * new: fitrans: simple image shift operations can be implied now
+	using the -e or --shift command line options. 
+ * fix: lfit: the LIBC/math calls of finite(.) have been replaced to 
+	isfinite(.).
+ * chg: The `fizip` and `fiunzip` tasks are removed from the whole package.
+	We suggest to use the more sophisticated, faster and standard
+	FITS compression tools `fpack` and `funpack`, that works nicely
+	in parallel with the task of the FITSH package (not transparently, but
+	standard input/output pipes can be built easily). As of now, a native 
+	support for the tile compression method used by `fpack`	and `funpack` 
+	is not planned. 
+ * chg: Some standard project files (./AUTHORS, ./CHANGELOG, ./COPYING, 
+	./INSTALL and ./README) have been added to the source tree. 
+ * new: The target `make deb` creates a Debian package on the current 
+	architecture (this feature requies the `dpkg-deb` utility and also
+	depends on the `help2man` program in order to create the manual pages
+	that also should go into the Debian package). 
+ * new: Related to the new `make deb` target, the subdirectory ./deb (currently
+	with two files) has been created in the source tree. 
+
+0.9.0
+=====
+ * new:	The first public release of the FITSH package. See ./README and the 
+	inline reference manuals (--long-help) for further details. 
+	See also ./INSTALL for installation tips. 

@@ -1,0 +1,451 @@
+#!/bin/bash
+
+# Debian package dependencies: bash, mawk|gawk, wget
+
+###############################################################################
+
+## This is only needed for --list --help, to fetch listable items 
+SELF=/home/apal/usr/bin/vizquery
+basename=`basename $0`
+
+## Default parameters:
+HOST=cds
+CAT=usno
+VIZCAT=""
+PRINT_VIZ_COLUMNS=false
+ARG_LIST=""
+RA=
+DEC=
+SIZE=
+LMAG=""
+LVAL=""
+OUT_MAX=1000000000
+
+while [ -n "$1" ]; do
+    case "$1" in
+	-h|--help)
+		echo -e "Usage:	$basename [-h|--help]"
+		echo -e "	--<catalog_name,_see_below>"
+		echo -e "	[-a|--catalog|--catalog-code <vizier_catalog_code>]"
+		echo -e "	[-d|--columns|--vizier-catalog-columns]"
+		echo -e "	-l|--list {list-of-output|--help|--<catalog_name>}"
+		echo -e "	-r|--right-ascension <RA> -d|--declination <DEC>"
+		echo -e "	-c|--center|--coordinates <RA>,<DEC>"
+		echo -e "	-s|--size <size>"
+		echo -e "	[-i|--limit <magnitude>:<value>]"
+		echo -e "	[-e|--server cds|cfa|cadc|adac|iucaa|bejing|cambridge|ukirt|moscow]"
+		echo -e "	[-e|--server http://<vizier_mirror_server_name>]"
+		echo -e "Available catalogs:"
+		echo -e "	-U|--usno|--usno-b|--usno-b1.0"
+		echo -e "	-C|--ucac|--ucac4"
+		echo -e "	-A|--apass"
+		echo -e "	-2|--2mass"
+		echo -e "	-S|--sloan|--sdss"
+		echo -e "	-G|--gaia"
+		echo -e "	-H|--hipparchos"
+		exit	0
+		;;
+	-U|--usno|--usno-b|--usno-b1.0)	CAT=usno	;;
+	-C|--ucac|--ucac4)		CAT=ucac4	;;
+	-A|--apass)			CAT=apass	;;
+	-2|--2mass)			CAT=2mass	;;
+	-S|--sloan)			CAT=sloan	;;
+	-G|--gaia)			CAT=gaia	;;
+	-H|--hipparchos)		CAT=hipparchos	;;
+	-a|--catalog|--catalog-code)
+		shift
+		VIZCAT="$1"
+		;;
+	-d|--columns|--vizier-catalog-columns)
+		PRINT_VIZ_COLUMNS=true
+		;;
+	-l|--list)
+		shift
+		if [ -n "$ARG_LIST" ]; then
+			ARG_LIST="$ARG_LIST,$1"
+		else
+			ARG_LIST="$1"
+		fi
+		;;
+	-i|--limit)
+		shift
+		A=(`echo "$1" | tr ":" " "`)
+		LMAG=${A[0]}
+		LVAL=${A[1]}
+		if ! [ -n "$LVAL" ]; then
+			echo -e	"$basename: error: invalid limit specification '$1'." >> /dev/stderr
+			exit	1
+		fi
+		;;
+	-e|--server)
+		shift
+		HOST="$1"
+		;;
+	-r|--right-ascension)
+		shift
+		RA="$1"
+		;;
+	-d|--declination)
+		shift
+		DEC="$1"
+		;;
+	-c|--center|--coordinates)
+		shift
+		A=(`echo "$1" | tr "," " "`)
+		RA=${A[0]}
+		DEC=${A[1]}
+		if ! [ -n "$DEC" ]; then
+			echo -e	"$basename: error: invalid coordinate specification '$1'." >> /dev/stderr
+			exit	1
+		fi
+		;;
+	-s|--size)
+		shift
+		SIZE="$1"
+		;;
+	*)
+		echo -e "$basename: error: invalid command line argument near '$1'." >> /dev/stderr
+		exit	1
+		;;
+    esac; shift
+done
+
+## List items that can follow --list
+if [ "$ARG_LIST" == "-h" ] || [ "$ARG_LIST" == "--help" ]; then
+	cat $SELF | \
+	awk -v i=0 \
+	 '{	if ( $1=="##" && $2=="cat:" )
+		 {	printf("--%s --list ...\n",$3);i=1;	}
+		else if ( i && $1=="esac" )	i=0;
+		else if ( i )
+		 	printf("\t%s\n",substr($1,1,length($1)-1));
+	 }'
+	exit	0
+elif [ "${ARG_LIST:0:2}" == "--" ]; then
+	cat $SELF | \
+	awk -v i=0 -v cat="${ARG_LIST:2}" \
+	 '{	if ( $1=="##" && $2=="cat:" && $3==cat )
+		 {	printf("--%s --list ...\n",$3);i=1;	}
+		else if ( i && $1=="esac" )	i=0;
+		else if ( i )
+		 	printf("\t%s\n",substr($1,1,length($1)-1));
+	 }'
+	exit	0
+fi
+
+## One needs to specify list of output fields, coordinates and size as well:
+if ! $PRINT_VIZ_COLUMNS; then
+	if ! [ -n "$ARG_LIST" ] || ! [ -n "$RA" ] || ! [ -n "$DEC" ] || ! [ -n "$SIZE" ]; then
+		echo	-e "$basename: warning: no list, coordinates or query size has been specified." >> /dev/stderr
+		exit	0
+	fi
+fi
+
+###############################################################################
+
+function associate_source()
+{
+ local	a=""
+ case "$1" in
+	apass)		a="II/336/apass9";;
+	usno)		a="I/284/out";;
+	ucac4)		a="I/322A/out";;
+        2mass)		a="II/246/out";;
+	gaia)		a="I/337/gaia";;
+	hipparchos)	a="I/239/hip_main" ;;
+	sloan)		a="V/139/sdss9";; 
+ esac
+ test -n "$a" && echo $a
+}
+
+function associate_host()
+{
+ local	a=""
+ case "$1" in
+	cds)		a=http://vizier.u-strasbg.fr;;
+	cfa)		a=http://vizier.cfa.harvard.edu;;
+	cadc)		a=http://vizier.hia.nrc.ca;;
+	adac)		a=http://vizier.nao.ac.jp;;
+	iucaa)		a=http://vizier.iucaa.ernet.in;;
+	bejing)		a=http://data.bao.ac.cn;;
+	cambridge)	a=http://vizier.ast.cam.ac.uk;;
+	ukirt)		a=http://www.ukirt.jach.hawaii.edu ;;
+	moscow)		a=http://vizier.inasan.ru;;
+ esac
+ test -n "$a" && echo $a
+}
+
+function associate_item()
+{
+ local	cat="$1"
+ local	arg="$2"
+ local	a=""
+ if [ "$cat" == usno ]; then
+	case "$arg" in
+		## cat: usno
+		id)		a=USNO-B1.0;;
+		ra)		a=RAJ2000;;
+		dec)		a=DEJ2000;;
+		[Bb]1mag)		a=B1mag;;
+		[Rr]1mag)		a=R1mag;;
+		[Bb]mag|[Bb]2mag)	a=B2mag;;
+		[Rr]mag|[Rr]2mag)	a=R2mag;;
+		[Ii]mag)		a=Imag;;
+	esac
+ elif [ "$cat" == ucac4 ]; then
+	case "$arg" in
+		## cat: ucac4
+		id)		a=UCAC4;;
+		ra)		a=RAJ2000;;
+		dec)		a=DEJ2000;;
+		err_ra)		a=e_RAJ2000;;
+		err_dec)	a=e_DEJ2000;;
+		amag)		a=a.mag;;
+		err_amag)	a=e_a.mag;;
+		pmra)		a=pmRA;;
+		pmdec)		a=pmDE;;
+		epoch_ra)	a=EpRA;;
+		epoch_dec)	a=EpDE;;
+		err_pmra)	a=e_pmRA;;
+		err_pmdec)	a=e_pmDE;;
+		key_2mass)	a=2Mkey;;
+		[jJ]mag)	a=Jmag;;
+		err_[jJ]mag)	a=e_Jmag;;
+		[hH]mag)	a=Hmag;;
+		err_[hH]mag)	a=e_Hmag;;
+		[kK]mag)	a=Kmag;;
+		err_[kK]mag)	a=e_Kmag;;
+	esac
+ elif [ "$cat" == apass ]; then
+	case "$arg" in
+		## cat: apass
+		id)		a=recno;;
+		ra)		a=RAJ2000;;
+		dec)		a=DEJ2000;;
+		err_ra)		a=e_RAJ2000;;
+		err_dec)	a=e_DEJ2000;;
+		field)		a=Field;;
+		nobs)		a=nobs;;
+		mobs)		a=mobs;;
+		BV)		a=B-V;;
+		err_BV)		a=e_B-V;;
+		[Bb]mag)	a=Bmag;;
+		err_[Bb]mag)	a=e_Bmag;;
+		[Vv]mag)	a=Vmag;;
+		err_[Vv]mag)	a=e_Vmag;;
+		gmag)		a=g\'mag;;
+		err_gmag)	a=e_g\'mag;;
+		rmag)		a=r\'mag;;
+		err_rmag)	a=e_r\'mag;;
+		imag)		a=i\'mag;;
+		err_imag)	a=e_i\'mag;;
+	esac
+ elif [ "$cat" == 2mass ]; then
+	case "$arg" in
+		## cat: 2mass
+		id)	a=2MASS;;
+		ra)	a=RAJ2000;;
+		dec)	a=DEJ2000;;
+		[jJ]mag)	a=Jmag;;
+		[hH]mag)	a=Hmag;;
+		[kK]mag)	a=Kmag;;
+		err_[jJ]mag)	a=e_Jmag;;
+		err_[hH]mag)	a=e_Hmag;;
+		err_[kK]mag)	a=e_Kmag;;
+	esac
+ elif [ "$cat" == sloan ]; then
+	case "$arg" in
+		## cat: sloan
+		id)	a=SDSS9;;
+		ra)	a=RAJ2000;;
+		dec)	a=DEJ2000;;
+		umag)	a=umag;;
+		gmag)	a=gmag;;
+		rmag)	a=rmag;;
+		imag)	a=imag;;
+		zmag)	a=zmag;;
+		err_umag)	a=e_umag;;
+		err_gmag)	a=e_gmag;;
+		err_rmag)	a=e_rmag;;
+		err_imag)	a=e_imag;;
+		err_zmag)	a=e_zmag;;
+	esac
+ elif [ "$cat" == gaia ]; then
+	case "$arg" in
+		## cat: gaia
+		id)			a=Source;;
+		ra)			a=RA_ICRS;;
+		dec)			a=DE_ICRS;;
+		err_ra)			a=e_RA_ICRS;;
+		err_dec)		a=e_DE_ICRS;;
+		pmra)			a=pmRA;;
+		pmdec)			a=pmDE;;
+		err_pmra)		a=e_pmRA;;
+		err_pmdec)		a=e_pmDE;;
+		plx)			a=Plx;;
+		err_plx)		a=e_Plx;;
+		corr_ra_dec)		a=RADEcor;;
+		corr_ra_pmra)		a=RApmRAcor;;
+		corr_ra_pmdec)		a=RApmDEcor;;
+		corr_dec_pmra)		a=DEpmRAcor;;
+		corr_dec_pmdec)		a=DEpmDEcor;;
+		corr_pmra_pmdec)	a=pmRApmDEcor;;
+		corr_plx_ra)		a=RAPlxcor;;
+		corr_plx_dec)		a=DEPlxcor;;
+		corr_plx_pmra)		a=PlxpmRAcor;;
+		corr_plx_pmdec)		a=PlxpmDEcor;;
+		epoch)			a=Epoch;;
+		gmag)			a="<Gmag>";;
+	esac
+ elif [ "$cat" == hipparchos ]; then
+	case "$arg" in
+		## cat: hipparchos
+		id)			a=HIP;;
+		ra)			a="RA(ICRS)";;
+		dec)			a="DE(ICRS)";;
+		err_ra)			a=e_RAdeg;;
+		err_dec)		a=e_DEdeg;;
+		pmra)			a=pmRA;;
+		pmdec)			a=pmDE;;
+		err_pmra)		a=e_pmRA;;
+		err_pmdec)		a=e_pmDE;;
+		plx)			a=Plx;;
+		err_plx)		a=e_Plx;;
+		corr_ra_dec)		a=DE:RA;;
+		corr_ra_pmra)		a=pmRA:RA;;
+		corr_ra_pmdec)		a=pmDE:RA;;
+		corr_dec_pmra)		a=pmRA:DE;;
+		corr_dec_pmdec)		a=pmDE:DE;;
+		corr_pmra_pmdec)	a=pmDE:pmRA;;
+		corr_plx_ra)		a=Plx:RA;;
+		corr_plx_dec)		a=Plx:DE;;
+		corr_plx_pmra)		a=pmRA:Plx;;
+		corr_plx_pmdec)		a=pmDE:Plx;;
+		BTmag)			a=BTmag;;
+		err_BTmag)		a=e_BTmag;;
+		VTmag)			a=VTmag;;
+		err_VTmag)		a=e_VTmag;;
+		B-V)			a=B-V;;
+		err_B-V)		a=e_B-V;;
+		hmag)			a=Hpmag;;
+		err_hmag)		a=e_Hpmag;;
+	esac
+ fi
+ test -n "$a" && echo $a
+}
+
+function print_vizier_columns()
+{
+ local	SOURCE="$1"
+ local	HOST=http://vizier.u-strasbg.fr
+ local	POST=()
+
+ POST=$(	echo    "-source=${SOURCE}"
+	        echo    "-out.all"
+		echo	"-out.max=1"
+       		echo    "-c=0 0"
+	        echo    "-c.rd=10"
+	)
+
+ echo "# $SOURCE:"
+ wget	--post-data="${POST}" \
+	--quiet \
+	--output-document=- \
+	$HOST/viz-bin/asu-tsv | \
+ awk '/^#Column/{ print $2; }'
+}
+
+###############################################################################
+
+LIST=
+ONF=0
+
+if test -n "$VIZCAT"; then
+
+	SOURCE=$VIZCAT
+
+	if $PRINT_VIZ_COLUMNS; then
+		print_vizier_columns $SOURCE
+		exit	0
+	fi
+
+	LIST=$ARG_LIST
+
+	A=(`echo $LIST | tr "," " "`)
+	ONF=${#A[*]}
+
+	if [ -n "$LMAG" ] && [ -n "$LVAL" ]; then
+		:
+	else
+		LMAG=""
+		LVAL=""
+	fi
+
+else
+
+	SOURCE=`associate_source $CAT`
+
+	if $PRINT_VIZ_COLUMNS; then
+		print_vizier_columns $SOURCE
+		exit	0
+	fi
+
+	A=`echo $ARG_LIST | tr "," " "`
+	for arg in $A; do 
+		a=`associate_item $CAT $arg`
+		if ! [ -n "$a" ]; then
+			echo -e "$basename: error: invalid list item '$arg' for catalogue '$CAT'." >> /dev/stderr
+			exit	1
+		fi
+		if [ $ONF -eq 0 ]; then LIST=$a; else LIST=$LIST,$a; fi
+		ONF=$((ONF+1))
+	done
+
+	if [ -n "$LMAG" ] && [ -n "$LVAL" ]; then
+		a=`associate_item $CAT $LMAG`
+		if ! [ -n "$a" ]; then
+			echo -e "$basename: error: invalid magnitude type '$LMAG' for catalogue '$CAT'." >> /dev/stderr
+			exit	1
+		fi
+		LMAG="$a"
+	else
+		LMAG=""
+		LVAL=""
+	fi
+
+fi
+
+if [ ${HOST:0:7} == "http://" ]; then
+	:
+else
+	a=`associate_host $HOST`
+	if ! [ -n "$a" ]; then
+		echo -e "$basename: error: invalid server name: '$HOST'." >> /dev/stderr
+		exit	1
+	fi
+	HOST="$a"
+fi
+
+RA=`echo $RA | awk '{ if ( $1==int($1) ) printf("%.1f",$1); else print $1; }'`
+
+#echo "[$RA]" "[$DEC]" >> /dev/stderr
+
+POST=$(	echo    "-source=${SOURCE}"
+        echo    "-out=${LIST}"
+	echo	"-out.max=${OUT_MAX}"
+        echo    "-c=${RA} ${DEC}"
+        echo    "-c.rd=${SIZE}"
+	test -n "${LMAG}" && echo "${LMAG}=<${LVAL}"
+	)
+
+wget	--post-data="${POST}" \
+	--quiet \
+	--output-document=- \
+	$HOST/viz-bin/asu-tsv | \
+egrep -v '^#|^[[:blank:]]*$' | \
+tail -n +4 | \
+awk -v ONF=$ONF \
+ '{	#if ( NF==ONF || ONF<=0 )
+		print;		
+  }' 
+

@@ -1,0 +1,5 @@
+NDEG      = 2
+SIGMA_F   = 2.0
+MAX_NITER = 3
+VERBOSE = 1
+END

@@ -1,0 +1,12 @@
+NSUB = 36	// number of brightest stars to be taken
+LLIM = 5.0	// minimum length of the longest side of a triangle [in pixels]
+RLIM = 5.0	// maximum ratio of the lengths of the sides of a triangle
+FVNO = 0.2	// ratio of triangles to be identified
+LTOL = 1.0	// maximum difference of the longest side length between
+RTOL = 0.02	// maximum difference between side lengths ratios [in %]
+CTOL = 0.02	// maximum difference of the cosines [in %]
+PTOL = 0.5	// final tolerance of the X,Y coordinates of the same star
+VERBOSE = 1	// verbose level: 0,1,2,...
+END
+========
+File modified by Wojtek Pych, 2005.04.19, CAMK PAN

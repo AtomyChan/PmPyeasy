@@ -1,0 +1,155 @@
+
+                    Installing ccdproc & friends
+                    Version 1.5 - 2005 January 21
+
+See RELEASE.txt for information about this release of ccdproc and friends.
+
+The current release of the CCDProc suite contains code for the following
+executables:
+
+	ccdproc    -- CCD processing program
+	imcombine  -- simple image combination (mean or sum)
+	normalize  -- divide an image by its mean (for flats)
+	dicer      -- dice an image into subimages
+	flt2int    -- convert floating (BITPIX=-32) images to ints (BITPIX=16)
+        imstat     -- compute basic image statistics [min/max/mean/mode/sigma]
+
+Installation Instructions
+-------------------------
+
+0) ccdproc requires that you have a recent version of the gcc compiler
+   available on your system.  ccdproc and its relatives are not 100%
+   guaranteed under Sun's ANSI C compilers, and will not compile under the
+   non-ANSI generic (ucb) C compiler that shipped with older SunOS boxes.
+   GNU's gcc is a public-domain ANSI-C compiler.  
+
+   ** NOTE: on the OSU Astronomy Linux network, the ccdproc distribution
+            comes ready to use the stock gcc compiler already on the system.
+
+
+1) Unpack the tar file where you want to create the CCDProc directory.
+   
+        % zcat ccdproc.tgz | tar xvf -
+
+   This creates the CCDProc/ directory tree.
+
+
+2) If you have at least version 2.0 of the HEASARC cfitsio libraries
+   on your machine, find out the full path to where the files
+   ``libcfitsio.a'' and ``fitsio.h'' reside.  They should be in the
+   same directory.  Skip ahead to step 3.
+
+   ** NOTE: on the OSU Astronomy Linux network, the latest version of the
+            cfitsio is always loaded on all machines.  The source code
+            is located in /usr/local/pkg/cfitsio, and the default settings
+            in the Makefile are already setup for this configuration.
+            OSU USERS CAN THEREFORE SKIP THIS STEP.
+
+   If you do not have version 2.0 or later of the HEASARC cfitsio
+   subroutine libraries installed on your machine, you will need to
+   get this package and build it now.  The latest version as of this
+   release is 2.032 (1999 May 26), but I have only tested it with
+   v2.031 (1999 March 31).  Release notes suggest that the new version
+   has changes that do not suggest an urgent upgrade for this package.
+
+   The libraries are available on the web at 
+
+        http://heasarc.gsfc.nasa.gov/docs/software/fitsio/
+
+   installation is easy, just follow the directions.  Full user
+   documentation is available at the same URL.  As of the last code
+   release of CCDProc, we are requiring that you upgrade to v2.0 of
+   CFITSIO, as this version implements the Year2000-compliant ISO8601
+   date/time format for FITS headers that will became standard in 1999.
+
+   Once you've installed the cfitsio libraries, remember the path to
+   where the source directory resides.  You will need this for the
+   next steps to compile ccdproc.
+
+3) Go to the CCDProc directory
+
+        % cd CCDProc
+
+   and edit the Makefile to edit the values of these environment
+   variables:
+
+	CFITSIO=/usr/local/pkg/cfitsio
+
+   replace this definition with the path to your version of the 
+   CFITSIO libraries from step 2 (OSU users: this is already correct for
+   our system so leave it as is).
+
+   Then set the CCDBin directory to point to where you want the
+   executables to go.  For testing purposes, this is setup by default
+   to the current working directory (.):
+
+	CCDBin=.
+
+   In this case, the Makefile will create executables of ccdproc and
+   friends "in place", meaning in the same directory as the
+   source code.  If you want to instead have a separate "installed
+   binary" directory, change the value of CCDBin to point to that
+   directory.  For example, to install them in /home/pollux/smith/bin,
+   you would set
+
+	CCDBin=/home/pollux/smith/bin
+
+   And when you type "make install" they will be copied there.
+   *IF* you do this, you need to go down to the "install:" section
+   of the Makefile and uncomment the "\cp" lines so that the move
+   takes place.  We do this to cut out the chatter when cp tries
+   to copy the binaries into themselves (the shell will gripe).
+
+   Finally, check the path to your gcc given by
+
+	CC=gcc
+
+   If "gcc" is in your default path, no changes are needed.  If, however,
+   you need to give an explicit path, change it like so
+
+	CC=/usr/bin/gcc
+
+
+4) Edit the CCDProc.h file.  If you are on a SunOS machine, you will
+   need to make sure that 
+
+        #define __SUNOS 
+
+   is defined.  If you are on a Solaris or Linux box, this line must read:
+
+        #undef __SUNOS
+
+   The instructions in the CCDProc.h file will guide you.
+
+   *** OSU Astronomy users may skip this step, unless they are installing
+       the package on a Solaris machine.
+
+
+5) Compile the ccdproc and imcombine programs using make.
+
+	% make clean
+
+   Will erase any lingering defunct .o or binary files.  Then type
+
+	% make
+
+   This should compile all of the utility subroutines and the
+   executables of ccdproc and imcombine.   When you are satisfied
+   things are working, you will type
+
+	% make install
+
+   Which will do the post-compilation cleanup and if you have set
+   CCDBin to point to a special bin/ directory, it will copy the
+   executables there.
+
+   This should make the ccdproc executable in the current working
+   directory.
+
+   For additional information, see the ccdproc.hlp file for a
+   description of the program and examples of proc files.
+   
+------------------------------
+R. Pogge, OSU Astronomy Dept.
+pogge@astronomy.ohio-state.edu
+2005 January 21

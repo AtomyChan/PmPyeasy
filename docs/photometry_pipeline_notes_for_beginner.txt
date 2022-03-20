@@ -1,0 +1,75 @@
+
+Go to the pipeline directory: (for example, /home/tqs/photometry_pipeline)
+
+ipython #enter python command line shell
+
+Notes: all commands below start with $ and message after # are comments
+
+$import ASASSN_photometry
+$sn = ASASSN_photometry.photometry('2017cfd', 'LCOGT', photometry_method='apphot') #  replace the target name, telescope name and photometry method accrodingly. change 'apphot' to 'psfphot' if PSF photometry is wanted 
+
+sn.image_flt2int(which_dir='raw_image') #convert the data type of image from float to integer
+sn.get_fwhm_bkg(which_dir='modified_image') 
+sn.get_star_number_rough(which_dir='modified_image')
+
+if sfind doesn't work, use:
+$sn.get_star_number_rough(which_dir='raw_image',method='fistar',fistar_ntime_above_bkg=3)
+
+automatic template:
+$sn.get_template_image()
+
+
+
+$sn._photometry__find_template_imagekey()
+
+
+#show the templates
+$sn.templates
+
+
+$sn._photometry__dict2table() 
+$sn.result_table_newsaved
+
+
+check information on given image:
+$sn.photometry_info['001.fits']
+
+#check image with ds9
+$sn.display_image_with_ds9('002.fits', which_dir='raw_image')
+
+# if automatic template is not ideal, assign mannually:
+$sn.assign_template_image('rp','002.fits')
+
+#get the supernova position
+$sn.get_target_xys(tpl_method='ds9')  #mouse picking from ds9 window
+
+#sn.get_target_xys(tpl_method='manual') #wait for input
+
+#sn.get_target_xys(tpl_method='astrometry') #this use astrometry.net API for astrometry first 
+
+#What's next depends on what you want.
+#If aperture photometry:
+$sn.get_apphot_iraf_parameters()
+$sn.aperture_photometry_apphot_iraf(which_dir='raw_image',aperture_size_fixed=False)
+
+#If PSF photometry:
+$sn.psf_photometry_dophot(which_dir='raw_image')
+
+$sn.get_relative_mags()
+
+$sn.get_standards(catalog='apass')
+
+
+#if you want to see the intermediate plot use
+#sn.cal_plot = True
+
+#calibrate againt APASS
+$sn.standard_calibration(tpl_has_wcs=True, all_tpl_astrometry=True, renew_tpl_astrometry=False,link_stdref_obs_method='surrounding_search',std_obs_matched=False)
+
+#to plot and check:                              
+$sn.lc_plot('calmag')                            
+# other options are 'instmag', 'relmag' or 'calmag'
+
+#After you do photometry for the object, remember to save the photometry info by 
+$sn.save_results()                                                              
+

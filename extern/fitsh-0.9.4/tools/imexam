@@ -1,0 +1,264 @@
+#!/bin/bash
+
+###############################################################################
+
+function get_xpa_method()
+{
+ cat /proc/net/tcp | tr ":" " " | tail -n +2 | \
+ awk -v uid=`id -u` \
+  '{    port=strtonum("0x" $3);
+        if ( $2=="00000000" && $6=="0A" && $12==uid && 32768 <= port ) 
+                printf("localhost:%d\n",port);
+  }' | \
+ head -n 1
+}
+
+# Required external binaries:
+AWK=awk
+XPAGET=xpaget
+GNUPLOT=gnuplot
+FIRANDOM=firandom
+FIPHOT=fiphot
+LFIT=lfit
+
+# default plotting parameters:
+radialradius=10
+sx=16
+sy=16
+aperture=5:7:5
+
+METHOD=`get_xpa_method`
+if ! [ -n "$METHOD" ]; then
+        echo "$0: unable to fetch DS9 XPA listen port autmatically." >> /dev/std
+        exit    1
+fi
+
+###############################################################################
+
+while [ -n "$1" ]; do
+    case "$1" in
+	-h|--help)
+		echo -e "Usage:\t$0 [-h|--help]"
+		echo -e "\t[-a|--aperture <r0>:<d0>:<dw>]"
+		exit	0
+		;;
+	-a|--aperture)
+		aperture="$2"
+		shift
+		;;
+	*)
+		echo "$0: error: invalid command line argument near '$1'." >> /dev/stderr
+		exit	1
+		;;
+    esac; shift
+done
+
+gnuplot_pid=0
+
+tlist=/tmp/imexam.$$.list
+tfits=/tmp/imexam.$$.fits
+GFD=3
+
+# Execute this if Ctrl+C is pressed: 
+trap 'rm -f $tlist $tfits; echo -e "\n$0: interrupted, exiting." >> /dev/stderr; exit 0' SIGINT
+
+###############################################################################
+
+while true ; do		# loop forever, by default
+
+	# Ask DS9 what's going on:
+	A=(`${XPAGET} ${METHOD} imexam key coordinate image 2>/dev/null`)
+	if [ 0 -lt $? ] ; then 
+		echo	"$0: XPA failed, exiting... maybe DS9 is not running?" >> /dev/stderr
+		break
+	fi
+	key=${A[0]}
+	x=${A[1]}
+	y=${A[2]}
+
+	# Exit `imexam` if q or Q is pressed in DS9:
+	if test "$key" == "q" || test "$key" == "Q" ; then break ; fi
+
+	# the user clicked out of the image:
+	test -n "$x" || continue
+	test -n "$y" || continue
+
+	# some initializations:
+	x0=`echo $x $sx | awk '{ print $1-$2/2; }'`
+	y0=`echo $y $sy | awk '{ print $1-$2/2; }'`
+	ix0=`echo $x0 | awk '{ print int($1)+1; }'`
+	iy0=`echo $y0 | awk '{ print int($1)+1; }'`
+
+	filename=`${XPAGET} ${METHOD} file name`
+
+	# Extract relavant image parts from DS9, still using XPA:
+	${XPAGET} ${METHOD} data image $ix0 $iy0 $sx $sy no | \
+	${AWK} -v x0=$ix0 -v y0=$iy0 -v sx=$sx -v sy=$sy \
+	 '{	coords=$1;value=$3;
+		if ( 3 <= NF )
+		 {	split(coords,a,",");
+			j=a[1]-(x0+1);i=a[2]-(y0+1);
+			if ( 0 <= j && j < sx && 0 <= i && i < sy )
+			 {	print	j,i,value;	}
+		 }
+	 }' > $tlist 
+	if [ 0 -lt $? ] ; then 
+		echo	"$0: XPA failed, exiting." >> /dev/stderr
+		break
+	fi
+
+	# Create a FITS image from this small (`sx` by `sy`) stamp:
+	${FIRANDOM} \
+		--size $sx,$sy \
+		--input-sky $tlist --col-pixel 1,2 --col-value 3 \
+		--bitpix -32 --output $tfits
+
+	px=$((sx/2))
+	py=$((sy/2))
+
+	# Do some interative aperture photometry to refine centroid coordinates:
+	F=($(	echo 1 $px $py $px $py | \
+		${FIPHOT} \
+			--input $tfits --input-list - --col-id 1 --col-xy 4,5 \
+			--aperture $aperture --sky-fit median,iterations=0 \
+			--format IXY,XYMmBbW --output - | \
+		${FIPHOT} \
+			--input $tfits --input-list - --col-id 1 --col-xy 4,5 \
+			--aperture $aperture --sky-fit median,iterations=0 \
+			--format IXY,XYMmBbW --output - ))
+
+	# Refined initial guesses for profile parameters, obtained from phot:
+	ax0=${F[3]}
+	ay0=${F[4]}
+	mmag=${F[5]}
+	merr=${F[6]}
+	w=${F[9]}
+	S=`echo $w | ${AWK} '{ if ( 0<w ) print 1/($1*$1);else print 1; }'`
+
+	# Do a linear fit to obtain the still unknown 
+	# background level and source peak amplitude:
+	A=($(	cat $tlist | \
+		${AWK} -v R=$radialradius -v ax0=$ax0 -v ay0=$ay0 \
+		 '{	dx=$1+0.5-ax0;
+			dy=$2+0.5-ay0;
+			if ( dx*dx+dy*dy <= R*R )	print;
+		 }' | \
+		lfit	-v b,a \
+			-c x,y,f \
+			-f "b+a*exp(-0.5*($S)*((x+0.5-($ax0))^2+(y+0.5-($ay0))^2))" \
+			-y f 2>/dev/null
+	 ))
+
+	# Do the same fit, but using a nonlinear regression to refine all of 
+	# the centroid parameters (and the amplitude/background as well):
+	A=($(	cat $tlist | \
+		${AWK} -v R=$radialradius -v ax0=$ax0 -v ay0=$ay0 \
+		 '{	dx=$1+0.5-ax0;
+			dy=$2+0.5-ay0;
+			if ( dx*dx+dy*dy <= R*R )	print;
+		 }' | \
+		lfit	--nllm \
+			-v b=${A[0]},a=${A[1]},x0=$ax0,y0=$ay0,S=$S \
+			-c x,y,f \
+			-f "b+a*exp(-0.5*S*((x+0.5-x0)^2+(y+0.5-y0)^2))" \
+			-y f 2>/dev/null
+	 ))
+
+	# Store the best-fit output values:
+	gbg=${A[0]}
+	gam=${A[1]}
+	gx0=${A[2]}
+	gy0=${A[3]}
+	gss=${A[4]}
+
+	# Compute FWHM from the gaussian inverse square width parameter: 
+	fwhm=`echo $gss | ${AWK} '{ if (0<$1) printf("%.2f\n",2.35482/sqrt($1)); else print 0; }'`
+
+	# Launch GNUPLOT if it has not been started previously:
+	if test ${gnuplot_pid} -le 0 ; then
+		fifo=/tmp/imexam.$$.fifo
+		mkfifo	$fifo
+		$GNUPLOT <$fifo >/dev/null 2>/dev/null & 
+		gnuplot_pid=$!
+		exec	3<>$fifo
+		( sleep 0.5; rm -f $fifo ) &
+		echo	"set term x11" >&${GFD}
+	fi
+
+	# Key = R: This is the well-known radial plot:
+	if [ "$key" == "r" ] || [ "$key" == "R" ] ; then
+		cx=`echo $x0 $ax0 | ${AWK} '{ printf("%.2f\n",$1+$2); }'`
+		cy=`echo $y0 $ay0 | ${AWK} '{ printf("%.2f\n",$1+$2); }'`
+
+		# Feed background GNUPLOT process via file desc ${GFD} (=3). 
+		 (	echo	"unset key"
+			echo	"set size noratio"
+			echo	"set title 'Center: (x,y)=($cx,$cy) FWHM=$fwhm Magnitude=$mmag/$merr"
+			echo	"plot [0:$radialradius] '$tlist' " \
+				"using (sqrt((\$1+0.5-($ax0))**2+(\$2+0.5-($ay0))**2)):3 w p pt 7 ps 1, " \
+				"($gbg)+($gam)*exp(-0.5*($gss)*(x**2)) w l lt 3 lw 3" 
+		 ) >&${GFD}
+
+	elif [ "$key" == "a" ] || [ "$key" == "A" ] ; then
+		cx=`echo $x0 $ax0 | ${AWK} '{ printf("%.2f\n",$1+$2); }'`
+		cy=`echo $y0 $ay0 | ${AWK} '{ printf("%.2f\n",$1+$2); }'`
+
+		echo $filename $cx $cy $mmag $merr
+
+	# Key = S: This is the surface plot:
+	elif [ "$key" == "s" ] || [ "$key" == "S" ] ; then
+
+		# Feed background GNUPLOT process via file desc ${GFD} (=3). 
+		 (	echo	"unset title"
+			echo	"unset key"
+			echo	"set dgrid3d $sx,$sy"
+			echo	"set hidden3d"
+			echo	"set view 60, 30, 1, 1"
+			echo	"set size noratio"
+			echo	"unset contour"
+			echo	"splot [$x0:$((x0+sx-1))] [$y0:$((y0+sy-1))]" \
+			"'$tlist' u (\$1+($x0)):(\$2+($y0)):3 with lines" 
+		 ) >&${GFD}
+
+	# Key = S: This is the contour plot:
+	elif [ "$key" == "e" ] || [ "$key" == "E" ] ; then
+
+		# Feed background GNUPLOT process via file desc ${GFD} (=3). 
+		 (	echo	"unset title"
+			echo	"unset key"
+			echo	"set dgrid3d $sx,$sy"
+			echo	"set pm3d corners2color mean map clip1in"
+			echo	"set view map"
+			echo	"set size ratio 1"
+			echo	"set cntrparam levels 10"
+			echo	"set contour"
+			echo	"set palette grey"
+			echo	"unset colorbox"
+			echo	"splot [$x0:$((x0+sx-1))] [$y0:$((y0+sy-1))]" \
+				"'$tlist' u (\$1+($x0)):(\$2+($y0)):3" 
+		 ) >&${GFD}
+
+	elif [ "$key" == "Tab" ]; then
+		:
+	# Otherwise, print some warning: 
+	else
+		if [ "$key" == "Left" ] || [ "$key" == "Right" ] || [ "$key" == "Up" ] || [ "$key" == "Down" ]; then
+			:
+		else
+			echo "$0: unexpected key: ${key}, continuing." >> /dev/stderr
+		fi
+	fi
+
+	# Cleanup (local temporary files) and relax a bit:
+	# (don't stress DS9 with the XPA/imexam method)
+	rm -f $tfits
+	sleep	0.3
+
+done
+
+###############################################################################
+
+# Final cleanup:
+rm -f $tlist
+
+###############################################################################

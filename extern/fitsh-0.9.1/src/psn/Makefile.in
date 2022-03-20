@@ -1,0 +1,24 @@
+SHELL=/bin/sh
+
+CC=@CC@
+AR=@AR@
+LD=@LD@
+
+INC=../../include
+
+CFLAGS=@CFLAGS@ -I$(INC)
+
+.PHONY: all clean
+
+all: psn-general.o psn-general-ds.o
+
+psn-general.o: psn-general.c psn-general.h
+	$(CC) $(CFLAGS) -c psn-general.c
+
+psn-general-ds.o: psn-general-ds.c psn-general-ds.h psn-general.h
+	$(CC) $(CFLAGS) -c psn-general-ds.c
+
+clean:
+	rm -f *.o *.a $(TARGETS)
+
+

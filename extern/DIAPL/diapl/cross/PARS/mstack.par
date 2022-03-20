@@ -1,0 +1,16 @@
+NY          = 1124
+HIST_NBIN   = 2000
+HIST_LOW    = 0.0
+HIST_HIGH   = 2000.0
+NBIN_SMOOTH = 6
+BAD_VALUE   = 65000.0      
+BKG_FRAC    = 0.3
+THRESHOLD   = 300.0
+MIN_SCALE   = 0.5
+MAX_SCALE   = 2.0
+MIN_NGOOD   = 3
+N_REJ_LOW   = 1
+N_REJ_HIGH  = 1
+MEDIAN      = 0
+VERBOSE     = 1
+END

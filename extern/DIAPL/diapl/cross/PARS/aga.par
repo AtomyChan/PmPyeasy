@@ -1,0 +1,29 @@
+KER_HW        = 15
+N_COMP        = 3
+DEG_1         = 4
+SIG_GAUSS_1   = 0.78
+DEG_INC       = -1
+SIG_GAUSS_INC = 1.732
+BKG_DEG       = 1
+BAD_VALUE     = 65000.0
+BAD_GROWRAD1  = 2
+BAD_GROWRAD2  = 2
+MIN_AREA      = 0.4
+MAX_NITER     = 3
+N_SIG         = 3.0
+MAX_CHI2      = 8.0
+WDEG_SPATIAL  = 2
+DOM_HW        = 15
+NDOM_X        = 20
+NDOM_Y        = 20
+DOM_THRESH    = 500.0
+N_SIG_DOM     = 2.0
+DOMAIN_MODE   = 1
+MOHW          = 4
+N_ITER_DOM    = 2
+MIN_AREA_DOM  = 0.75
+MIN_NKEEP     = 50
+VERBOSE       = 1
+END
+
+COMMENT: NX=NX0-2*KER_HW and NY=NY0-2*KER_HW calculated in get_params()

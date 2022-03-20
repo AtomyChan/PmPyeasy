@@ -1,0 +1,8 @@
+[param]
+app           = 8.0
+skyin         = 10.0      
+skywidth      = 20.0    
+fwhmpsf       = 4.5     
+sky_sigma_down= 3.0      
+sky_sigma_up  = 3.0      
+def_zeropt    = 25.0  

@@ -1,0 +1,334 @@
+/*========================================================*/
+/*                                                        */
+/*  mstack.c            version 1.8.1   2005.05.18        */
+/*                                                        */
+/*  Original source code:                                 */
+/*  Copyright (C) 2005 by Przemek Wozniak                 */
+/*  wozniak@lanl.gov                                      */
+/*                                                        */
+/*  Modifications:                                        */
+/*  Copyright (C) 2005 by Wojtek Pych, CAMK PAN           */
+/*  pych@camk.edu.pl                                      */
+/*                                                        */
+/*  Written for GNU project C and C++ Compiler            */
+/*                                                        */
+/* Program stacks images using median for a given pixel   */
+/* and saving pixels which were bad on some images,       */
+/* but have enough information in them.                   */
+/*                                                        */
+/*========================================================*/
+
+int main(int argc, char *argv[])
+{
+        char        **header,
+                    **theader,
+                    value[VALUE_SIZE],
+                    **imnames,  /* input files names              */
+                    *outfname,  /* output file name               */
+                    *parfname,  /* parameters file name pointer   */
+                    *instrname,
+                    *imnfname,  /* list of input files file name  */
+                    *refname;   /* background and scale reference image name */
+        int         count,
+                    i,
+                    nx0, ny0,
+                    nx, ny,
+                    k, iim, nim,
+                    *indx,
+                    x0_off, y0_off,
+                    isec, nsec, idx, igood,
+                    hsize, thsize;
+        long        *headlen;
+        double       *hist1, *hist2,
+                    *bins1, *bins2,
+                    low, high, low0, high0,
+                    bin_size,
+                    *bkg, *scale, *temp, bg, refbg, sum_xy, sum_x2, mean, med,
+                    *im, *refim, *imstack, **data;
+        PAR_STRUCT  par;
+        FILE        *outf;
+
+/* IO stuff */
+  if (argc != 6) usage();
+
+  parfname =argv[1];
+  instrname=argv[2];
+  refname  =argv[3];
+  imnfname =argv[4];
+  outfname =argv[5];
+
+/* read in parameters */
+  get_params(parfname, instrname, &par);
+
+  if (par.verbose > 1)
+  {
+    printf("parfname= %s\n", parfname);
+    printf("instrname= %s\n", instrname);
+    printf("refname= %s\n", refname);
+    printf("imnfname= %s\n", imnfname);
+    printf("outfname= %s\n", outfname);
+  }
+
+  nim=read_imnames(imnfname, &imnames);
+
+  if (par.verbose)
+  {
+    printf("%s: %d images\n", imnfname, nim);
+    if (par.verbose > 1)
+      for (i=0; i<nim; i++) printf("%s\n", imnames[i]);
+    printf("\n");
+  }
+
+  if (nim < par.min_ngood)
+  {
+    printf("MIN_NGOOD (%d) too large for the number of input images (%d)\n",
+            par.min_ngood, nim);
+    exit(2);
+  }
+
+/* get memory */
+  if (!(bkg  =(double *)malloc(nim*sizeof(double)))) errmess("malloc(bkg)");
+  if (!(scale=(double *)malloc(nim*sizeof(double)))) errmess("malloc(scale)");
+  if (!(temp =(double *)malloc(nim*sizeof(double)))) errmess("malloc(temp)");
+
+  if (!(hist1=(double *)malloc(par.nbin*sizeof(double))))
+    errmess("malloc(hist1)");
+  if (!(hist2=(double *)malloc((par.nbin/par.nsmooth)*sizeof(double))))
+    errmess("malloc(hist2)");
+  if (!(bins1=(double *)malloc(par.nbin*sizeof(double))))
+    errmess("malloc(bins1)");
+  if (!(bins2=(double *)malloc(par.nbin*sizeof(double))))
+    errmess("malloc(bins2)");
+
+  if (!(indx=(int *)malloc(nim*sizeof(int)))) errmess("malloc(indx)");
+
+  if (!(headlen=(long *)malloc(nim*sizeof(long)))) errmess("malloc(headlen)");
+
+/* make histogram axes */
+  bin_size = (par.high - par.low)/(double)par.nbin;
+  if (par.verbose > 2) printf("histogram bin_size= %g\n", bin_size);
+
+  for (k=0; k<par.nbin; k++)
+    bins1[k] = par.low + (k+0.5)*bin_size;
+
+  for (k=0; k<par.nbin/par.nsmooth; k++)
+    bins2[k] = par.low + (k+0.5)*par.nsmooth*bin_size;
+
+  if (par.verbose > 2) printf("bkg and scale reference: %s\n", refname);
+
+  refim=read_FITS_2D1file(refname, 's', &hsize, &header, &nx0, &ny0);
+  if (par.verbose > 3) printf("%s: %d x %d\n", refname, nx0, ny0);
+
+  if (nx0 != par.nx0)
+  {
+    printf("%s: NAXIS1= %d <> NX0= %d\n", refname, nx0, par.nx0);
+    printf("mstack: wrong image size\n");
+    exit(3);
+  }
+  if (ny0 != par.ny0)
+  {
+    printf("%s: NAXIS2= %d <> NY0= %d\n", refname, ny0, par.ny0);
+    printf("mstack: wrong image size\n");
+    exit(4);
+  }
+
+  histogram(refim, nx0, ny0, hist1, par.nbin, par.low, par.high);
+  if (par.verbose > 3) printf("Histogram created\n");
+
+  bin(hist1, par.nbin, hist2, par.nsmooth);
+
+  get_peak(hist2, bins2, 2, par.nbin/par.nsmooth-2, &low0, &high0);
+
+  refbg = median(hist1, bins1, par.nbin, low0, high0, par.bkg_frac);
+
+  if (par.verbose)
+    printf("reference image: %s  bkg= %g  scale= 1\n", refname, refbg);
+
+/**********************************************************/
+/* loop over remaining images to get background and scale */
+/**********************************************************/
+
+  igood = 0;
+
+  for (iim=0; iim<nim; iim++)
+  {
+    if (par.verbose > 3) printf("image[%d]: %s\n", iim, imnames[iim]);
+
+    im=read_FITS_2D1file(imnames[iim], 's', &thsize, &theader, &nx0, &ny0);
+    for (i=0; i<hsize; i++) free(theader[i]);
+    free(theader);
+
+    headlen[iim]=thsize*CARD_SIZE;
+    if (thsize%RECORD_CARDS)
+      headlen[iim]+=(RECORD_CARDS-thsize%RECORD_CARDS)*CARD_SIZE;
+
+    if (nx0 != par.nx0)
+    {
+      printf("%s: NAXIS1= %d <> NX0= %d\n", imnames[iim], nx0, par.nx0);
+      printf("mstack: wrong image size\n");
+      exit(5);
+    }
+
+    if (ny0 != par.ny0)
+    {
+      printf("%s: NAXIS2= %d <> NY0= %d\n", imnames[iim], ny0, par.ny0);
+      printf("mstack: wrong image size\n");
+      exit(6);
+    }
+
+    histogram(im, nx0, ny0, hist1, par.nbin, par.low, par.high);
+
+    bin(hist1, par.nbin, hist2, par.nsmooth);
+
+    get_peak(hist2, bins2, 2, par.nbin/par.nsmooth-2, &low, &high);
+
+    bg = median(hist1, bins1, par. nbin, low, high, par.bkg_frac);
+
+    sum_xy = sum_x2 = 0.0;
+
+    for (k=0; k<nx0*ny0; k++)
+    {
+      if (refim[k] >= high0 + par.threshold)
+      {
+        sum_x2 += (im[k]-bg)*(im[k]-bg)/(im[k]+refim[k]);
+        sum_xy += (im[k]-bg)*(refim[k]-refbg)/(im[k]+refim[k]);
+      }
+    }
+
+    bkg[igood]   = bg;
+    scale[igood] = sum_xy/sum_x2;
+
+    if (par.verbose)
+      printf("image: %s  bkg= %g  scale= %g     ",
+              imnames[iim], bkg[igood], scale[igood]);
+
+    if ((scale[igood] >= par.min_scale) && (scale[igood] <= par.max_scale))
+    {
+      if (igood != iim) strcpy(imnames[igood], imnames[iim]);
+      igood++;
+      if (par.verbose) printf("\n");
+    }
+    else  printf("rejected\n");
+
+    free(im);
+  }
+
+  nim = igood;
+
+  if (nim < 1) errmess("mstack: no images left!");
+
+/* set sizes and shifts for reading image sections */
+
+  nx = nx0;
+  ny = par.ny;
+
+  x0_off = 0;
+
+  nsec = par.ny0/par.ny;
+
+/* get memory for image sections */
+  if (!(imstack=(double *)malloc(nx*ny*sizeof(double))))
+    errmess("malloc(imstack)");
+
+  if (!(data=(double **)malloc(nim*sizeof(double *)))) errmess("malloc(data)");
+  for(iim=0; iim<nim; iim++)
+    if (!(data[iim]=(double *)malloc(nx*ny*sizeof(double))))
+      errmess("malloc(data[iim])");
+
+/* modify header */
+  if ((k=get_FITS_key(hsize, header, "BITPIX", value)) == -1)
+  {
+    printf("ERROR! mstack: BITPIX not found in the FITS header\n");
+    exit(2);
+  }
+  strcpy(header[k], "BITPIX  =                  -32");
+  strcat(header[k], " / Bits per pixel                                 ");
+
+  hsize=del_header_card(hsize, &header, "BZERO");
+  hsize=del_header_card(hsize, &header, "BSCALE");
+
+/* write a random output image */
+  if (par.verbose > 3)  printf("\nWriting header to %s\n", outfname);
+  if (!(outf=fopen(outfname, "w"))) errmess(outfname);
+  write_FITS_header(outf, hsize, header);
+  fclose(outf);
+
+  for (i=0; i<hsize; i++) free(header[i]);
+  free(header);
+
+/***************************************/
+/*** loop over image sections in "y" ***/
+/***************************************/
+
+  for (isec=0; isec<=nsec; isec++)
+  {
+    y0_off = isec*ny;
+
+/* leftover section may have a different size */
+
+    if (isec == nsec) ny = ny0 - nsec*ny;
+    if (ny <= 0) break;
+
+/* read a single section of all images */
+    for (iim=0; iim<nim; iim++)
+      read_sector(imnames[iim], headlen[iim], nx0, ny0, x0_off, y0_off,
+                  (char *)data[iim], sizeof(double), nx, ny);
+
+/* take median of images for each pixel (discard bad pixels) */
+/*    put bad value when unable to come up with a number     */
+
+    for (k=0; k<nx*ny; k++)
+    {
+      count = 0;
+      mean  = 0.0;
+
+      for (iim=0; iim<nim; iim++)
+      {
+        if ((data[iim][k] < par.sat_level) && (data[iim][k] >= par.min_level))
+        {
+          temp[iim] = (data[iim][k]-bkg[iim])*scale[iim];
+          mean += temp[iim];
+          count++;
+        }
+        else
+        {
+          temp[iim] = -BIG_double;
+          if (par.verbose > 5)
+            printf("data pont: iim= %d   k= %d  %g rejected from mean\n",
+                    iim, k, data[iim][k]);
+	}
+      }
+
+      if (count > 0)  mean /= count;
+      if (par.verbose > 4) printf("mean[%d]= %g  count= %d\n", k, mean, count);
+
+      if (par.median)
+      {
+        quick_sort(temp, indx, nim);
+
+        idx = 0;
+        while ((idx < nim) && (temp[indx[idx]] == -BIG_double)) idx++;
+
+        med   = temp[indx[idx-1+(int)(0.50*(nim-idx)+0.5)]];
+
+        if (par.verbose > 3) printf("median= %g\n", med);
+
+        if (count >= par.min_ngood) imstack[k] = med + refbg;
+        else                        imstack[k] = par.bad_value;
+      }
+      else
+      {
+        if (count >= par.min_ngood) imstack[k] = mean + refbg;
+        else                        imstack[k] = par.bad_value;
+      }
+    }
+
+    write_sector(outfname, headlen[0], nx0, ny0, x0_off, y0_off,
+                 (char *)imstack, sizeof(double), nx, ny, 0);
+  }
+
+  if (par.verbose)  printf("\nimage stack written to %s\n", outfname);
+
+  return(0);
+}
+/*** END ***/

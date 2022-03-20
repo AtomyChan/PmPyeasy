@@ -1,0 +1,21 @@
+SHELL=/bin/sh
+
+CC=@CC@
+AR=@AR@
+LD=@LD@
+RANLIB=@RANLIB@
+
+CFLAGS=@CFLAGS@
+
+all: intersec.o intersec-cri.o
+
+.PHONY: all clean
+
+intersec.o: intersec.c intersec.h
+	$(CC) $(CFLAGS) -c intersec.c
+
+intersec-cri.o: intersec-cri.c intersec-cri.h
+	$(CC) $(CFLAGS) -c intersec-cri.c
+
+clean:
+	rm -f *.o *.a 

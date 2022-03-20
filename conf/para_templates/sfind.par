@@ -1,0 +1,14 @@
+MOHW = 5	//approximate FWHM used for the correlation
+SMHW  = 3	//maximum distance of the brightest pixel from the star's center
+N_SIG = 2	//sigma clipping factor for pixels inside an annulus/circle (?)
+SIG_X = 2.5	//starting sigma in X for the PSF model
+SIG_Y = 2.5	//starting sigma in Y for the PSF model
+C_MIN = 0.5	//minimum correlation to be accept as a star
+APRAD  = 15.0	//photometry aperture radius
+ANRAD1 = 20.0	//inner radius of the background annulus
+ANRAD2 = 30.0	//outer radius of the background annulus
+ABS_THRESH = -1.0	//threshold above the background for star detection If (ABS_THRESH<0) then SIG_THRESH is used
+SIG_THRESH = 5.0	//sigma threshold above the background for star detection used only when (ABS_THRESH<0)
+BKG_ALG = median	// supported modes are: mode, median, mean (mode = 3*median - 2*mean)
+VERBOSE = 0
+END

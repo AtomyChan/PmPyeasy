@@ -1,0 +1,17 @@
+SHELL=/bin/sh
+
+CC=@CC@
+AR=@AR@
+LD=@LD@
+
+CFLAGS=@CFLAGS@
+
+all: expint.o 
+
+.PHONY: all clean
+
+expint.o: expint.c expint.h
+	$(CC) $(CFLAGS) -c expint.c
+
+clean:
+	rm -f *.o *.a

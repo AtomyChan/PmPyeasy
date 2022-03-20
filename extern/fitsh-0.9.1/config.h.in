@@ -1,0 +1,11 @@
+/*****************************************************************************/
+/* Main configuration file for the `fitsh` package			     */
+/*****************************************************************************/
+
+#define		FI_VERSION		"@FI_VERSION@"
+#define		FI_RELEASE_DATE		"@FI_RELEASE@"
+#define		FI_MAINT_RNAME		"Pal, Andras"
+#define		FI_MAINT_EMAIL		"apal@szofi.net"
+
+/*****************************************************************************/
+

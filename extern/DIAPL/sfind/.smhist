@@ -1,0 +1,67 @@
+data a.txt
+read {x 1 y 2}
+limits 0 50 0 50
+box
+ptype 20 3
+points x y
+box
+read {x 1 y 2}
+points x y
+data a.txt
+read {x 1 y 2}
+limits 0 50 0 50
+box
+ptype 20 3
+points x y
+data a.txt
+read {x 1 y 2}
+limits 0 50 0 50
+box
+ptype 20 3
+points x y
+device x11 -fg black
+data b.txt
+read {x 1 y 2}
+limits 0 280 0 280
+box
+ptype 20 1
+points  x y
+ptype 4 0
+points  x y
+ptype 20 0
+points  x y
+box
+points  x y
+ctype red
+data b1.txt
+read {x 1 y 2}
+points  x y
+read {x 1 y 2 z 3}
+expand z
+box
+expand 1
+box
+expand z
+points x y
+ctype black
+box
+expand 1
+box
+expand 20-z
+points x y
+expand 18-z
+points x y
+expand 16-z
+points x y
+data b.txt
+read {x 1 y 2 z 3}
+expand 1
+box
+expand 16-z
+points x y
+expand 15-z
+points x y
+expand 1
+box
+expand 15-z
+points x y

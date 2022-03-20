@@ -1,0 +1,30 @@
+SHELL = /bin/sh
+
+CC=@CC@
+AR=@AR@
+LD=@LD@
+
+CFLAGS=@CFLAGS@
+
+DLEXT=@DLEXT@
+DLSWC=@DLSWC@
+
+INC=../include
+
+.PHONY: all clean
+
+all: libpsn.a
+
+psn.o: psn.c $(INC)/psn/psn.h
+	$(CC) $(CFLAGS) -I$(INC) -c psn.c
+
+libpsn.a: psn.o
+	$(AR) src libpsn.a psn.o
+
+libpsn.$(DLEXT): psn.o
+	$(LD) -o libpsn.$(DLEXT) $(DLSWC) psn.o
+	chmod -x libpsn.$(DLEXT)
+
+clean:
+	rm -f *.o *.a *.$(DLEXT)
+

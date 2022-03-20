@@ -8971,14 +8971,16 @@ class photometry():
 			if not plot_droped:
 				table_flt = self.__select_rows_from_table(table_flt,'drop',0)
 
-			table_flt.sort('obstime')
+			if len(table_flt) == 0:
+				continue
 
+			table_flt.sort('obstime')
 			obstimes = table_flt['obstime']
 			mags = table_flt[magcolname]
 			magerrs = table_flt[magerrcolname]
 
 			if not plot_bined_only:
-				ax.errorbar(obstimes-t0,mags,yerr=magerrs,fmt='o')
+				ax.errorbar(obstimes-t0,mags,yerr=magerrs,fmt='o', label=flt)
 
 			if bining:
 				obstimes_bined = []
@@ -9016,7 +9018,7 @@ class photometry():
 					obstimes_bined.append(obstime_bined)
 					mags_bined.append(mag_bined)
 					magerrs_bined.append(magerr_bined)
-				ax.errorbar(obstimes_bined-t0,mags_bined, yerr=magerrs_bined,fmt='s')
+				ax.errorbar(obstimes_bined-t0,mags_bined, yerr=magerrs_bined,fmt='s', label=flt+'_bin')
 		if ylabeltext is None:
 			ylabeltext = 'Magnitude'
 		ax.set_ylabel(ylabeltext, fontsize=18)
@@ -9027,7 +9029,7 @@ class photometry():
 				xlabeltext = 'JD - %s'%str(t0)
 		ax.set_xlabel(xlabeltext, fontsize=18)
 		ax.invert_yaxis()
-		ax.legend(flts_plot)
+		ax.legend(loc=0)
 		plt.show()
 
 #Photometry records management
